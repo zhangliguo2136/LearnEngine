@@ -1,0 +1,24 @@
+#pragma once
+#include <string>
+
+#include "Material.h"
+#include "MaterialInstance.h"
+
+class TMaterialRepository
+{
+public:
+	static TMaterialRepository& Get();
+
+	void Load();
+	void Unload();
+
+	TMaterialInstance* GetMaterialInstance(const std::string& MaterialInstanceName) const;
+
+private:
+	TMaterial* CreateMaterial(const std::string& MaterialName, const std::string& ShaderName);
+	TMaterialInstance* CreateMaterialInstance(TMaterial* Material, const std::string& MaterialInstanceName);
+
+private:
+	std::unordered_map<std::string, std::unique_ptr<TMaterial>> MaterialMap;
+	std::unordered_map<std::string, std::unique_ptr<TMaterialInstance>> MaterialInstanceMap;
+};

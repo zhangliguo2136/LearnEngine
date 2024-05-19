@@ -1,0 +1,13 @@
+LearnEngine/.vs
+LearnEngine/Debug
+LearnEngine/x64
+LearnEngine/Engine/x64
+LearnEngine/Engine/Binaries
+LearnEngine/Engine/Intermediate
+LearnEngine/Engine/x64
+LearnEngine/Engine/ThirdParty/FBX_SDK/include
+LearnEngine/Engine/ThirdParty/FBX_SDK/lib
+
+LearnEngine/Sample/x64
+LearnEngine/Sample/Binaries
+LearnEngine/Sample/Intermediate

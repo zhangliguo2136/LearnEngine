@@ -1,0 +1,422 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="资源文件\Shaders">
+      <UniqueIdentifier>{197ef70e-8375-4c40-ae9e-2c38213b7289}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Actor">
+      <UniqueIdentifier>{b9814624-ba68-4e45-af08-9f38596c3008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\D3D">
+      <UniqueIdentifier>{9a480a77-6e36-4237-870b-53078157f815}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Component">
+      <UniqueIdentifier>{e39ad58e-ea51-4fc3-bdbf-c456112e48da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Texture">
+      <UniqueIdentifier>{ba9a3d39-9b9b-436b-8936-3c7b3a29cfd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Mesh">
+      <UniqueIdentifier>{86618f32-5bb7-40e4-94ca-8409a758ed4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Engine">
+      <UniqueIdentifier>{283f0614-c406-401b-b454-af14aa640eaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Utils">
+      <UniqueIdentifier>{fbd97f1f-3adf-43aa-8ab4-892dbdc047ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Render">
+      <UniqueIdentifier>{07035d90-0073-48ec-9543-406f4fc7d2f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Material">
+      <UniqueIdentifier>{fcef599b-8853-4189-a749-efbb1713ac32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Math">
+      <UniqueIdentifier>{d3e45249-aecf-45b2-8702-ae406f218c73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Shader">
+      <UniqueIdentifier>{071dbf15-c799-40c2-acb1-bea1b8685d04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\World">
+      <UniqueIdentifier>{e998b464-31c4-4c17-a198-94c69330954e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Platform">
+      <UniqueIdentifier>{9433ed6e-9534-434c-a6c7-f5070db7fc94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Texture\Loader">
+      <UniqueIdentifier>{987e889f-08b4-488e-89b4-a92b58764e0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Mesh\Loader">
+      <UniqueIdentifier>{ff9be80f-66f3-4b42-aaa6-434b236b73ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Texture\Loader\stb_image">
+      <UniqueIdentifier>{e3793e83-f667-408e-bb17-cf7d1779a592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\D3D\D3DTexture">
+      <UniqueIdentifier>{c27cd2da-24ed-44a2-8ec0-d031b03629c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\D3D\D3DResource">
+      <UniqueIdentifier>{a97e0971-fbf7-469a-87bb-58d0f0221bf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\D3D\D3DDescriptor">
+      <UniqueIdentifier>{9b527917-6b1c-4c2e-9f57-738195ef7a56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\D3D\D3DView">
+      <UniqueIdentifier>{e2bbb739-3363-4307-82af-4cf3d576a347}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\D3D\D3DDevice">
+      <UniqueIdentifier>{051ba27d-859d-4629-bd4c-ce7906b05c69}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resource\Shaders\BasePassDefault.hlsl">
+      <Filter>资源文件\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shaders\DeferredLighting.hlsl">
+      <Filter>资源文件\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shaders\Material.hlsl">
+      <Filter>资源文件\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shaders\PBRLighting.hlsl">
+      <Filter>资源文件\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shaders\Sampler.hlsl">
+      <Filter>资源文件\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shaders\BasePassSky.hlsl">
+      <Filter>资源文件\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shaders\Common.hlsl">
+      <Filter>资源文件\Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Actor.cpp">
+      <Filter>源文件\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DRHI.cpp">
+      <Filter>源文件\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CameraComponent.cpp">
+      <Filter>源文件\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Component.cpp">
+      <Filter>源文件\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MeshComponent.cpp">
+      <Filter>源文件\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DirectionalLightActor.cpp">
+      <Filter>源文件\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine.cpp">
+      <Filter>源文件\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\InputLayout.cpp">
+      <Filter>源文件\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LightActor.cpp">
+      <Filter>源文件\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Material.cpp">
+      <Filter>源文件\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MaterialInstance.cpp">
+      <Filter>源文件\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MaterialRepository.cpp">
+      <Filter>源文件\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MyMath.cpp">
+      <Filter>源文件\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Matrix.cpp">
+      <Filter>源文件\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mesh.cpp">
+      <Filter>源文件\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MeshBatch.cpp">
+      <Filter>源文件\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MeshRepository.cpp">
+      <Filter>源文件\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PipelineState.cpp">
+      <Filter>源文件\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render.cpp">
+      <Filter>源文件\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Shader.cpp">
+      <Filter>源文件\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SkyActor.cpp">
+      <Filter>源文件\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StaticMeshActor.cpp">
+      <Filter>源文件\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Texture.cpp">
+      <Filter>源文件\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TextureRepository.cpp">
+      <Filter>源文件\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Transform.cpp">
+      <Filter>源文件\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utils.cpp">
+      <Filter>源文件\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Vector.cpp">
+      <Filter>源文件\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Vertex.cpp">
+      <Filter>源文件\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\World.cpp">
+      <Filter>源文件\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\WindowsApplication.cpp">
+      <Filter>源文件\Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DDSLoader.cpp">
+      <Filter>源文件\Texture\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\HDRLoader.cpp">
+      <Filter>源文件\Texture\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\JPGLoader.cpp">
+      <Filter>源文件\Texture\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PNGLoader.cpp">
+      <Filter>源文件\Texture\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FBXLoader.cpp">
+      <Filter>源文件\Mesh\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\stb_image.cpp">
+      <Filter>源文件\Texture\Loader\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TextureLoader.cpp">
+      <Filter>源文件\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DTexture.cpp">
+      <Filter>源文件\D3D\D3DTexture</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DResource.cpp">
+      <Filter>源文件\D3D\D3DResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DResourceAllocator.cpp">
+      <Filter>源文件\D3D\D3DResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DDescriptor.cpp">
+      <Filter>源文件\D3D\D3DDescriptor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DDescriptorAllocator.cpp">
+      <Filter>源文件\D3D\D3DDescriptor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DDescriptorCache.cpp">
+      <Filter>源文件\D3D\D3DDescriptor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DView.cpp">
+      <Filter>源文件\D3D\D3DView</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DViewAllocator.cpp">
+      <Filter>源文件\D3D\D3DView</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DCommandContent.cpp">
+      <Filter>源文件\D3D\D3DDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DDevice.cpp">
+      <Filter>源文件\D3D\D3DDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DViewport.cpp">
+      <Filter>源文件\D3D\D3DDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DTextureLoader.cpp">
+      <Filter>源文件\D3D\D3DTexture</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Actor.h">
+      <Filter>源文件\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DRHI.h">
+      <Filter>源文件\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\d3dx12.h">
+      <Filter>源文件\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CameraComponent.h">
+      <Filter>源文件\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Component.h">
+      <Filter>源文件\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MeshComponent.h">
+      <Filter>源文件\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DirectionalLightActor.h">
+      <Filter>源文件\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine.h">
+      <Filter>源文件\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FileSystem.h">
+      <Filter>源文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FormatConvert.h">
+      <Filter>源文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\InputLayout.h">
+      <Filter>源文件\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LightActor.h">
+      <Filter>源文件\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Material.h">
+      <Filter>源文件\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MaterialInput.h">
+      <Filter>源文件\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MaterialInstance.h">
+      <Filter>源文件\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MaterialRepository.h">
+      <Filter>源文件\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MyMath.h">
+      <Filter>源文件\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Matrix.h">
+      <Filter>源文件\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mesh.h">
+      <Filter>源文件\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MeshBatch.h">
+      <Filter>源文件\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MeshRepository.h">
+      <Filter>源文件\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PipelineState.h">
+      <Filter>源文件\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MeshProxy.h">
+      <Filter>源文件\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Render.h">
+      <Filter>源文件\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Shader.h">
+      <Filter>源文件\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SkyActor.h">
+      <Filter>源文件\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StaticMeshActor.h">
+      <Filter>源文件\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Texture.h">
+      <Filter>源文件\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\TextureRepository.h">
+      <Filter>源文件\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Transform.h">
+      <Filter>源文件\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utils.h">
+      <Filter>源文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Vector.h">
+      <Filter>源文件\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Vertex.h">
+      <Filter>源文件\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\World.h">
+      <Filter>源文件\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\WindowsApplication.h">
+      <Filter>源文件\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DDSLoader.h">
+      <Filter>源文件\Texture\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\HDRLoader.h">
+      <Filter>源文件\Texture\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\JPGLoader.h">
+      <Filter>源文件\Texture\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PNGLoader.h">
+      <Filter>源文件\Texture\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader.h">
+      <Filter>源文件\Mesh\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\stb_image.h">
+      <Filter>源文件\Texture\Loader\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\TextureLoader.h">
+      <Filter>源文件\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DTexture.h">
+      <Filter>源文件\D3D\D3DTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DResource.h">
+      <Filter>源文件\D3D\D3DResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DResourceAllocator.h">
+      <Filter>源文件\D3D\D3DResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DDescriptor.h">
+      <Filter>源文件\D3D\D3DDescriptor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DDescriptorAllocator.h">
+      <Filter>源文件\D3D\D3DDescriptor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DDescriptorCache.h">
+      <Filter>源文件\D3D\D3DDescriptor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DView.h">
+      <Filter>源文件\D3D\D3DView</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DViewAllocator.h">
+      <Filter>源文件\D3D\D3DView</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DCommandContent.h">
+      <Filter>源文件\D3D\D3DDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DDevice.h">
+      <Filter>源文件\D3D\D3DDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DViewport.h">
+      <Filter>源文件\D3D\D3DDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DTextureLoader.h">
+      <Filter>源文件\D3D\D3DTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderProxy.h">
+      <Filter>源文件\Render</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
