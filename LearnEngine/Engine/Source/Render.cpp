@@ -61,6 +61,8 @@ void TRender::Draw(float dt)
 	D3DRHI->GetCommandContent()->ExecuteCommandList();
 	D3DRHI->GetViewport()->Present();
 	D3DRHI->GetCommandContent()->FlushCommandQueue();
+
+	DescriptorCache->Clear();
 }
 
 void TRender::BasePass()
@@ -68,7 +70,7 @@ void TRender::BasePass()
 	auto ResourceAllocator = D3DRHI->GetDevice()->GetResourceAllocator();
 
 	// GatherAllMeshBatchs
-	std::vector<TMeshBatch> MeshBatchs;
+	MeshBatchs.clear();
 	auto Actors = World->GetActors();
 	std::vector<TMeshComponent*> AllMeshComponents;
 	for (auto Actor : Actors)
@@ -211,7 +213,7 @@ void TRender::BasePass()
 			D3DRHI->GetCommandContent()->GetCommandList()->IASetVertexBuffers(0, 1, &VBView);
 			// ÉèÖÃindex buffer
 			D3D12_INDEX_BUFFER_VIEW IBView;
-			IBView.BufferLocation = MeshProxy.VertexBuffer->D3DResource->GetGPUVirtualAddress();
+			IBView.BufferLocation = MeshProxy.IndexBuffer->D3DResource->GetGPUVirtualAddress();
 			IBView.Format = MeshProxy.IndexFormat;
 			IBView.SizeInBytes = MeshProxy.IndexBufferByteSize;
 			D3DRHI->GetCommandContent()->GetCommandList()->IASetIndexBuffer(&IBView);

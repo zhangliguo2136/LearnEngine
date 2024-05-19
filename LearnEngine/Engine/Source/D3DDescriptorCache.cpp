@@ -42,3 +42,12 @@ void TD3DDescriptorCache::AppendDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE Type, con
 
 	Heap.DescriptorOffset += SlotsNeeded;
 }
+
+void TD3DDescriptorCache::Clear()
+{
+	for (auto& Pair : HeapMap)
+	{
+		auto& Heap = Pair.second;
+		Heap.DescriptorOffset = 0;
+	}
+}

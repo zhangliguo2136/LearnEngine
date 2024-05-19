@@ -4,6 +4,7 @@
 
 #include "MeshProxy.h"
 #include "D3DTexture.h"
+#include "MeshBatch.h"
 
 class TD3DRHI;
 class TWorld;
@@ -52,6 +53,8 @@ private:
 	std::shared_ptr<TD3DResource> PassConstBufRef = nullptr;
 
 private:
+	std::vector<TMeshBatch> MeshBatchs;
+
 	// Mesh
 	std::unordered_map<std::string, TMeshProxy> MeshProxyMap;
 	// Texture
