@@ -17,7 +17,7 @@ public:
 
 public:
 	void CreateSphere(float Radius, uint32_t SliceCount, uint32_t StackCount);
-
+	void CreateQuad(float x, float y, float w, float h, float depth);
 public:
 	std::string MeshName;
 	std::string InputLayoutName;

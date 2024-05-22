@@ -251,6 +251,9 @@
     <ClCompile Include="Source\D3DTextureLoader.cpp">
       <Filter>源文件\D3D\D3DTexture</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Quaternion.cpp">
+      <Filter>源文件\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Actor.h">
@@ -417,6 +420,9 @@
     </ClInclude>
     <ClInclude Include="Source\RenderProxy.h">
       <Filter>源文件\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Quaternion.h">
+      <Filter>源文件\Math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -11,7 +11,7 @@ struct LightParameters
 };
 
 //D:法线分布函数 (Trowbridge-Reitz)
-float D_DistributionGGX(float3 NdotH, float Roughness)
+float D_DistributionGGX(float NdotH, float Roughness)
 {
     float a2 = Roughness * Roughness;
     
@@ -33,7 +33,7 @@ float3 F_SchlickFresnel(float3 F0, float3 HdotL, float3 VdotH)
 }
 
 // G
-float G_SchlickGGX(float3 NdotV, float Roughness)
+float G_SchlickGGX(float NdotV, float Roughness)
 {
     float k = pow(Roughness + 1, 2) / 8.0f;
     
@@ -44,7 +44,7 @@ float G_SchlickGGX(float3 NdotV, float Roughness)
 static const float F0_DIELECTRIC = 0.04f;
 float3 DefaultBRDF(float3 LightDir, float3 ViewDir, float3 Normal, float3 BaseColor, float Roughness, float Metallic)
 {
-    float halfVec = normalize(ViewDir + LightDir);
+    float3 halfVec = normalize(ViewDir + LightDir);
     float NdotL = saturate(dot(Normal, LightDir));
     float NdotV = saturate(dot(Normal, ViewDir));
     float VdotH = saturate(dot(ViewDir, halfVec));

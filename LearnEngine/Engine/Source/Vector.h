@@ -19,6 +19,12 @@ public:
 
 public:
 	void Normalize();
+	float Dot(const TVector3f& v);
+	TVector3f Cross(const TVector3f& v);
+
+public:
+	TVector3f operator*(float s);
+	TVector3f operator+=(const TVector3f& v);
 
 public:
 	float x = 0, y = 0, z = 0;
@@ -35,4 +41,13 @@ public:
 	static const TVector3f Left;
 	static const TVector3f Forward;
 	static const TVector3f Backward;
+};
+
+class TVector4f 
+{
+public:
+	TVector4f();
+	TVector4f(TVector3f InXYZ, float InW);
+public:
+	float x = 0, y = 0, z = 0, w = 0;
 };

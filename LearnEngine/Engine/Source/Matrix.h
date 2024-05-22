@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector.h"
+#include "Quaternion.h"
 
 class TMatrix
 {
@@ -33,12 +34,21 @@ public:
 	static TMatrix CreateScale(TVector3f Sacle);
 	static TMatrix CreateFromYawPitchRoll(float yaw, float pitch, float roll);
 	static TMatrix CreateTranslation(TVector3f Location);
+	static TMatrix CreateFromAxisAngle(TVector3f Right, float Radians);
+	static TMatrix CreateRotationY(float Radians);
+	static TMatrix CreatePerspectiveFieldOfView(float FovY, float Aspect, float NearZ, float FarZ);
+
+	static TMatrix RotationByQuat(const TQuaternion& quat);
 
 	TMatrix Transpose();
+	TVector3f TransformNormal(const TVector3f& v);
 
 	// ²Ù×÷·û
-	TMatrix& operator* (const TMatrix& M) noexcept;
-	TMatrix& operator*= (const TMatrix& M) noexcept;
+	TMatrix operator* (const TMatrix& M) noexcept;
+	TVector4f operator* (const TVector4f& V) noexcept;
+
+	float  operator() (size_t Row, size_t Column) const noexcept { return m[Row][Column]; }
+	float& operator() (size_t Row, size_t Column) noexcept { return m[Row][Column]; }
 
 public:
 	// Constants

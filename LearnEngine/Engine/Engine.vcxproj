@@ -100,6 +100,7 @@
     <ClCompile Include="Source\Texture.cpp" />
     <ClCompile Include="Source\TextureLoader.cpp" />
     <ClCompile Include="Source\TextureRepository.cpp" />
+    <ClCompile Include="Source\Quaternion.cpp" />
     <ClCompile Include="Source\Transform.cpp" />
     <ClCompile Include="Source\Utils.cpp" />
     <ClCompile Include="Source\Vector.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="Source\Texture.h" />
     <ClInclude Include="Source\TextureLoader.h" />
     <ClInclude Include="Source\TextureRepository.h" />
+    <ClInclude Include="Source\Quaternion.h" />
     <ClInclude Include="Source\Transform.h" />
     <ClInclude Include="Source\Utils.h" />
     <ClInclude Include="Source\Vector.h" />

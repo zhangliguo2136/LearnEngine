@@ -5,6 +5,7 @@
 #include "MeshProxy.h"
 #include "D3DTexture.h"
 #include "MeshBatch.h"
+#include "PipelineState.h"
 
 class TD3DRHI;
 class TWorld;
@@ -36,21 +37,30 @@ private:
 	std::unique_ptr<TD3DTexture> GBufferVelocity = nullptr;
 	std::unique_ptr<TD3DTexture> GBufferEmissive = nullptr;
 
+	std::unique_ptr<TD3DTexture> ColorTexture = nullptr;
+
 private:
 	TInputLayoutManager* InputLayoutManager = nullptr;
 	TGraphicsPSOManager* GraphicsPSOManager = nullptr;
 	TD3DTextureLoader* D3DTextureLoader = nullptr;
+
+	std::unique_ptr<TShader> DeferredLightingShader = nullptr;
+	TGraphicsPSODescriptor DeferredLightingPSODescriptor;
 
 private:
 	void CreateMeshProxys();
 	void CreateTextures();
 	void CreateInputLayouts();
 	void CreateGBuffers();
+	void CreateGlobalPipelineState();
+	void CreateColorTextures();
 
 	void UpdatePassConstants();
-
+	void UpdateLightParameters();
 private:
 	std::shared_ptr<TD3DResource> PassConstBufRef = nullptr;
+	std::shared_ptr<TD3DResource> LightParametersBufRef = nullptr;
+	std::shared_ptr<TD3DShaderResourceView> LightParametersSRVRef = nullptr;
 
 private:
 	std::vector<TMeshBatch> MeshBatchs;

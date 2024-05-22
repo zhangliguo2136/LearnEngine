@@ -3,14 +3,24 @@
 #include <tchar.h>
 
 
-void TWindowsApplication::Tick(TEngine* Engine)
+int TWindowsApplication::Run(TEngine* Engine)
 {
-	Engine->Update(0.f);
-}
+	MSG msg = { 0 };
 
-bool TWindowsApplication::IsQuit()
-{
-	return bQuit;
+	while (msg.message != WM_QUIT)
+	{
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else
+		{
+			Engine->Update(0.f);
+		}
+	}
+	
+	return (int)msg.wParam;
 }
 
 bool TWindowsApplication::Initialize()

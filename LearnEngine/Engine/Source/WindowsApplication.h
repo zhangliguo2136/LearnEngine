@@ -8,9 +8,7 @@ class TEngine;
 class TWindowsApplication
 {
 public:
-	void Tick(TEngine* Engine);
-	bool IsQuit();
-
+	int Run(TEngine* Engine);
 	bool Initialize();
 	bool Finalize();
 
@@ -32,6 +30,4 @@ private:
 
 	static const uint32_t WindowWidth = 960;
 	static const uint32_t WindowHeight = 540;
-
-	bool bQuit = false;
 };

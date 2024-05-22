@@ -11,6 +11,7 @@ cbuffer cbPass
 {
 	float4x4 gView;
 	float4x4 gProj;
+	float3 gEyePosW;
 };
 
 #endif

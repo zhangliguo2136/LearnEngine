@@ -63,10 +63,7 @@ int main()
 
 	World->InitWorld();
 
-	while (!App->IsQuit())
-	{
-		App->Tick(Engine);
-	}
+	App->Run(Engine);
 	App->Finalize();
 
 	return 0;

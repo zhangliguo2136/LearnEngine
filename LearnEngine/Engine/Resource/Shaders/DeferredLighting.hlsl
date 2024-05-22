@@ -1,5 +1,6 @@
 
 #include "Sampler.hlsl"
+#include "Common.hlsl"
 #include "PBRLighting.hlsl"
 
 struct VertexIn
@@ -10,8 +11,8 @@ struct VertexIn
 
 struct VertexOut
 {
-    float PosH : SV_POSITION;
-    float TexC : TEXCOORD;
+    float4 PosH : SV_POSITION;
+    float2 TexC : TEXCOORD;
 };
 
 VertexOut VS(VertexIn vin)
@@ -32,7 +33,7 @@ Texture2D EmissiveGbuffer;
 
 StructuredBuffer<LightParameters> Lights;
 
-float PS(VertexOut pin):SV_TARGET
+float4 PS(VertexOut pin):SV_TARGET
 {
     float3 FinalColor = 0.0f;
     
@@ -50,13 +51,17 @@ float PS(VertexOut pin):SV_TARGET
     float Metallic = OrmGbuffer.Sample(SamplerPointClamp, pin.TexC).b;
     
     // 自发光颜色
-    float EmissiveColor = EmissiveGbuffer.Sample(SamplerPointClamp, pin.TexC).rgb;
+    float3 EmissiveColor = EmissiveGbuffer.Sample(SamplerPointClamp, pin.TexC).rgb;
     
     // DefaultLit
     if (ShadingModel == 0)
     {
+        float3 ViewDir = normalize(gEyePosW - WorldPos);
+        Normal = normalize(Normal);
+
         FinalColor += EmissiveColor;
         
+        [unroll(10)]
         for (uint i = 0; i < LightCount; i++)
         {
             LightParameters Light = Lights[i];
@@ -64,8 +69,6 @@ float PS(VertexOut pin):SV_TARGET
             // Directional Light
             if (Light.LightType == 1)
             {
-                float3 ViewDir = float3(0.f);
-                
                 float3 LightDir = normalize(-Light.Direction);
                 float3 LightPosition = WorldPos + LightDir * 100.f;
                 
@@ -84,5 +87,4 @@ float PS(VertexOut pin):SV_TARGET
     }
 
     return float4(FinalColor, 1.0f);
-
 }

@@ -14,6 +14,12 @@ public:
 	TLightActor(const std::string& Name, ELightType InType);
 
 	~TLightActor();
+
+	ELightType GetType()
+	{
+		return Type;
+	}
+
 public:
 	TVector3f GetLightColor() const
 	{

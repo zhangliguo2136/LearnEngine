@@ -115,3 +115,44 @@ void TMesh::CreateSphere(float Radius, uint32_t SliceCount, uint32_t StackCount)
 
 	GenerateIndices16();
 }
+
+void TMesh::CreateQuad(float x, float y, float w, float h, float depth)
+{
+	Vertices.resize(4);
+	Indices32.resize(6);
+
+	// Position coordinates specified in NDC space.
+	Vertices[0] = TVertex(
+		x, y - h, depth,
+		0.0f, 0.0f, -1.0f,
+		1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f);
+
+	Vertices[1] = TVertex(
+		x, y, depth,
+		0.0f, 0.0f, -1.0f,
+		1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f);
+
+	Vertices[2] = TVertex(
+		x + w, y, depth,
+		0.0f, 0.0f, -1.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f);
+
+	Vertices[3] = TVertex(
+		x + w, y - h, depth,
+		0.0f, 0.0f, -1.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 1.0f);
+
+	Indices32[0] = 0;
+	Indices32[1] = 1;
+	Indices32[2] = 2;
+
+	Indices32[3] = 0;
+	Indices32[4] = 2;
+	Indices32[5] = 3;
+
+	GenerateIndices16();
+}
