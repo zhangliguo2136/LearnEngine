@@ -19,6 +19,8 @@
 #include "D3DViewAllocator.h"
 #include "RenderProxy.h"
 #include "DirectionalLightActor.h"
+#include "CameraComponent.h"
+#include "CameraActor.h"
 
 bool TRender::Initialize(TD3DRHI* InD3DRHI, TWorld* InWorld)
 {
@@ -678,14 +680,21 @@ void TRender::UpdatePassConstants()
 	PassConstBufRef = std::make_shared<TD3DResource>();
 	
 	// TODO Camera
-	TMatrix View = TMatrix::Identity;
-	TMatrix Proj = TMatrix::Identity;
-	TVector3f EysPosW = TVector3f::Zero;
+	TCameraComponent* CameraComponent = nullptr;
+	auto CameraActors = World->GetAllActorsOfClass<TCameraActor>();
+	for (auto CameraActor : CameraActors)
+	{
+		CameraComponent = CameraActor->GetCameraComponent();
+		break;
+	}
+	TMatrix View = CameraComponent->GetView();
+	TMatrix Proj = CameraComponent->GetProj();
+	TVector3f EyePosW = CameraComponent->GetWorldLocation();
 
 	TPassConstants PassConstants;
 	PassConstants.View = View;
 	PassConstants.Proj = Proj;
-	PassConstants.EysPosW = EysPosW;
+	PassConstants.EysPosW = EyePosW;
 
 	auto ResourceAllocator = D3DRHI->GetDevice()->GetResourceAllocator();
 

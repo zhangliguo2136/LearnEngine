@@ -46,8 +46,16 @@ public:
 class TVector4f 
 {
 public:
-	TVector4f();
+	TVector4f(const float& InX, const float& InY, const float& InZ, const float& InW);
 	TVector4f(TVector3f InXYZ, float InW);
 public:
 	float x = 0, y = 0, z = 0, w = 0;
+
+	// Constants
+	static const TVector4f Zero;
+	static const TVector4f One;
+	static const TVector4f UnitX;
+	static const TVector4f UnitY;
+	static const TVector4f UnitZ;
+	static const TVector4f UnitW;
 };

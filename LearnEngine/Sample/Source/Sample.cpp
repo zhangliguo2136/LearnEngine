@@ -6,6 +6,8 @@
 #include "DirectionalLightActor.h"
 #include "SkyActor.h"
 #include "StaticMeshActor.h"
+#include "CameraActor.h"
+#include "CameraComponent.h"
 
 class TSampleWorld :public TWorld
 {
@@ -14,6 +16,13 @@ public:
 
 	void InitWorld()
 	{
+
+		// Add Camera
+		auto Camera = AddActor<TCameraActor>("Camera");
+		Camera->GetCameraComponent()->SetWorldLocation(TVector3f(0.55f, 1.50f, -3.84f));
+		Camera->GetCameraComponent()->RotateY(-120.0f);
+		Camera->GetCameraComponent()->UpdateViewMatrix();
+
 		 // Add DirectionalLight
 		{
 			auto Light = AddActor<TDirectionalLightActor>("DirectionalLight");

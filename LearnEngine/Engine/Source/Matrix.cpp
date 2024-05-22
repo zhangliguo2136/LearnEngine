@@ -209,7 +209,7 @@ TMatrix TMatrix::operator*(const TMatrix& M) noexcept
 
 TVector4f TMatrix::operator*(const TVector4f& V) noexcept
 {
-	TVector4f NewV;
+	TVector4f NewV = TVector4f::Zero;
 
 	NewV.x = m[0][0] * V.x + m[0][1] * V.y + m[0][2] * V.z + m[0][3] * V.w;
 	NewV.y = m[1][0] * V.x + m[1][1] * V.y + m[1][2] * V.z + m[1][3] * V.w;

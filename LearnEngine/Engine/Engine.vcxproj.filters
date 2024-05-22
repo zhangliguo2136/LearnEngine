@@ -254,6 +254,9 @@
     <ClCompile Include="Source\Quaternion.cpp">
       <Filter>源文件\Math</Filter>
     </ClCompile>
+    <ClCompile Include="Source\CameraActor.cpp">
+      <Filter>源文件\Actor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Actor.h">
@@ -423,6 +426,9 @@
     </ClInclude>
     <ClInclude Include="Source\Quaternion.h">
       <Filter>源文件\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CameraActor.h">
+      <Filter>源文件\Actor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -45,6 +45,16 @@ TVector3f TVector3f::Cross(const TVector3f& v)
 	return Vec;
 }
 
+TVector3f TVector3f::operator*(float s)
+{
+	return TVector3f(x * s, y * s, z * s);
+}
+
+TVector3f TVector3f::operator+=(const TVector3f& v)
+{
+	return TVector3f(x + v.x, y + v.y, z + v.z);
+}
+
 const TVector3f TVector3f::Zero = { 0.f, 0.f, 0.f };
 const TVector3f TVector3f::One = { 1.f, 1.f, 1.f };
 const TVector3f TVector3f::UnitX = { 1.f, 0.f, 0.f };
@@ -57,7 +67,8 @@ const TVector3f TVector3f::Left = { -1.f, 0.f, 0.f };
 const TVector3f TVector3f::Forward = { 0.f, 0.f, -1.f };
 const TVector3f TVector3f::Backward = { 0.f, 0.f, 1.f };
 
-TVector4f::TVector4f()
+TVector4f::TVector4f(const float& InX, const float& InY, const float& InZ, const float& InW)
+	:x(InX), y(InY), z(InZ), w(InW)
 {
 }
 
@@ -65,3 +76,11 @@ TVector4f::TVector4f(TVector3f InXYZ, float InW)
 	:x(InXYZ.x), y(InXYZ.y), z(InXYZ.z), w(InW)
 {
 }
+
+
+const TVector4f TVector4f::Zero = { 0.f, 0.f, 0.f, 0.f };
+const TVector4f TVector4f::One = { 1.f, 1.f, 1.f, 1.f };
+const TVector4f TVector4f::UnitX = { 1.f, 0.f, 0.f, 0.f };
+const TVector4f TVector4f::UnitY = { 0.f, 1.f, 0.f, 0.f };
+const TVector4f TVector4f::UnitZ = { 0.f, 0.f, 1.f, 0.f };
+const TVector4f TVector4f::UnitW = { 0.f, 0.f, 0.f, 1.f };

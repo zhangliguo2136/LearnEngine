@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Actor.cpp" />
+    <ClCompile Include="Source\CameraActor.cpp" />
     <ClCompile Include="Source\CameraComponent.cpp" />
     <ClCompile Include="Source\Component.cpp" />
     <ClCompile Include="Source\D3DCommandContent.cpp" />
@@ -110,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Actor.h" />
+    <ClInclude Include="Source\CameraActor.h" />
     <ClInclude Include="Source\CameraComponent.h" />
     <ClInclude Include="Source\Component.h" />
     <ClInclude Include="Source\D3DCommandContent.h" />

@@ -8,6 +8,26 @@ public:
 	virtual ~TComponent() {}
 
 public:
+	virtual void SetWorldLocation(const TVector3f& Location)
+	{
+		WorldTransform.Location = Location;
+	}
+
+	TVector3f GetWorldLocation() const
+	{
+		return WorldTransform.Location;
+	}
+
+	virtual void SetWorldRotation(const TRotator& Rotation)
+	{
+		WorldTransform.Rotation = Rotation;
+	}
+
+	TRotator GetWorldRotation() const
+	{
+		return WorldTransform.Rotation;
+	}
+
 	void SetWorldTransform(const TTransform& Transform)
 	{
 		WorldTransform = Transform;

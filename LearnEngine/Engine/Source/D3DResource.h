@@ -37,6 +37,12 @@ public:
 		ResourceDesc.SampleDesc.Quality = 0;
 		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		//ClearValue.Format = DXGI_FORMAT_UNKNOWN;
+		//ClearValue.Color[0] = 0.f;
+		//ClearValue.Color[1] = 0.f;
+		//ClearValue.Color[2] = 0.f;
+		//ClearValue.Color[3] = 0.f;
 	}
 
 	static TD3DResourceInitInfo Buffer(uint32_t Size);
@@ -50,6 +56,8 @@ public:
 
 	D3D12_RESOURCE_DESC ResourceDesc;
 	D3D12_RESOURCE_STATES InitState = D3D12_RESOURCE_STATE_COMMON;
+
+	//D3D12_CLEAR_VALUE ClearValue;
 };
 
 class TD3DResource
