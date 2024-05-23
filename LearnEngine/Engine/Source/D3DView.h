@@ -1,6 +1,4 @@
 #pragma once
-#include <d3d12.h>
-
 #include "D3DDescriptorAllocator.h"
 
 class TD3DDevice;
@@ -56,4 +54,21 @@ public:
 	TD3DDepthStencilView(TD3DDevice* InDevice, TD3DResource* InResource);
 
 	virtual ~TD3DDepthStencilView();
+};
+
+class TD3DViewInitInfo
+{
+public:
+	D3D12_SHADER_RESOURCE_VIEW_DESC SRView;
+	D3D12_DEPTH_STENCIL_VIEW_DESC DSView;
+	D3D12_RENDER_TARGET_VIEW_DESC RTView;
+
+	TD3DResource* Resource;
+	
+public:
+	static TD3DViewInitInfo SRView_Texture2D(TD3DResource* InResource, DXGI_FORMAT SRVFormat);
+	static TD3DViewInitInfo DSView_Texture2D(TD3DResource* InResource, DXGI_FORMAT DSVFormat);
+	static TD3DViewInitInfo RTView_Texture2D(TD3DResource* InResource, DXGI_FORMAT RTVFormat);
+
+	static TD3DViewInitInfo SRView_Buffer(TD3DResource* InResource, uint32_t ElementCount, uint32_t ElementSize);
 };

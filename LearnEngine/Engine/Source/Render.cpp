@@ -2,6 +2,7 @@
 #include "D3DRHI.h"
 #include "D3DCommandContent.h"
 #include "D3DDescriptorCache.h"
+#include "D3DView.h"
 #include "D3DViewport.h"
 #include "MeshBatch.h"
 #include "MeshComponent.h"
@@ -105,7 +106,7 @@ void TRender::BasePass()
 
 		MeshBatch.ObjConstantsRef = std::make_shared<TD3DResource>();// = ObjConstant;
 
-		TD3DResourceInitInfo ObjConstInitInfo = TD3DResourceInitInfo::Buffer(sizeof(TObjectConstants));
+		TD3DResourceInitInfo ObjConstInitInfo = TD3DResourceInitInfo::Buffer_Default(sizeof(TObjectConstants));
 		ObjConstInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		ObjConstInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
 		ResourceAllocator->Allocate(ObjConstInitInfo, MeshBatch.ObjConstantsRef.get());
@@ -329,19 +330,14 @@ void TRender::CreateMeshProxys()
 		std::vector<std::uint16_t> indices = Mesh.Indices16;
 		const UINT IndexBufByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
-		// D3DRHI->CreateVertexBuffer(Mesh.Vertices.data(), VertexBufByteSize);
 		MeshProxy.VertexBuffer = std::make_shared<TD3DResource>();
-		TD3DResourceInitInfo VBufInitInfo = TD3DResourceInitInfo::Buffer(VertexBufByteSize);
-		VBufInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-		VBufInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
+		TD3DResourceInitInfo VBufInitInfo = TD3DResourceInitInfo::Buffer_Default(VertexBufByteSize);
 		ResourceAllocator->Allocate(VBufInitInfo, MeshProxy.VertexBuffer.get());
 		D3DRHI->UploadBuffer(MeshProxy.VertexBuffer.get(), Mesh.Vertices.data(), VertexBufByteSize);
 
 		// D3DRHI->CreateIndexBuffer(indices.data(), IndexBufByteSize);
 		MeshProxy.IndexBuffer = std::make_shared<TD3DResource>();
-		TD3DResourceInitInfo IBufInitInfo = TD3DResourceInitInfo::Buffer(IndexBufByteSize);
-		IBufInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-		IBufInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
+		TD3DResourceInitInfo IBufInitInfo = TD3DResourceInitInfo::Buffer_Default(IndexBufByteSize);
 		ResourceAllocator->Allocate(IBufInitInfo, MeshProxy.IndexBuffer.get());
 		D3DRHI->UploadBuffer(MeshProxy.IndexBuffer.get(), indices.data(), IndexBufByteSize);
 
@@ -404,166 +400,100 @@ void TRender::CreateGBuffers()
 
 	{
 		GBufferBaseColor = std::make_unique<TD3DTexture>();
+		GBufferBaseColor->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferBaseColor->GpuResource.get());
+		GBufferBaseColor->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferBaseColor->GpuResource.get());
+
 		TD3DResourceInitInfo BCInitInfo = TD3DResourceInitInfo::Texture2D(GBufferWidth, GBufferHeight, DXGI_FORMAT_R32G32B32A32_FLOAT);
-		BCInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
-		BCInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		BCInitInfo.ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		ResourceAllocator->Allocate(BCInitInfo, GBufferBaseColor->GpuResource.get());
 
-		D3D12_RENDER_TARGET_VIEW_DESC RTView;
-		RTView.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		RTView.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		RTView.Texture2D.MipSlice = 0;
-		RTView.Texture2D.PlaneSlice = 0;
-		GBufferBaseColor->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferBaseColor->GpuResource.get());
-		ViewAllocator->CreateRenderTargetView(GBufferBaseColor->GpuResource.get(), GBufferBaseColor->RTV.get(), RTView);
-	
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRView;
-		SRView.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SRView.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		SRView.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		SRView.Texture2D.MostDetailedMip = 0;
-		SRView.Texture2D.MipLevels = 1;
-		SRView.Texture2D.PlaneSlice = 0;
-		GBufferBaseColor->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferBaseColor->GpuResource.get());
-		ViewAllocator->CreateShaderResourceView(GBufferBaseColor->GpuResource.get(), GBufferBaseColor->SRV.get(), SRView);
+		TD3DViewInitInfo RTView = TD3DViewInitInfo::RTView_Texture2D(GBufferBaseColor->GpuResource.get(), DXGI_FORMAT_R32G32B32A32_FLOAT);
+		ViewAllocator->Allocate(GBufferBaseColor->RTV.get(), RTView);
+
+		TD3DViewInitInfo SRView = TD3DViewInitInfo::SRView_Texture2D(GBufferBaseColor->GpuResource.get(), DXGI_FORMAT_R32G32B32A32_FLOAT);
+		ViewAllocator->Allocate(GBufferBaseColor->SRV.get(), SRView);
 	}
 
 	{
 		GBufferNormal = std::make_unique<TD3DTexture>();
+		GBufferNormal->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferNormal->GpuResource.get());
+		GBufferNormal->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferNormal->GpuResource.get());
+
 		TD3DResourceInitInfo BNInitInfo = TD3DResourceInitInfo::Texture2D(GBufferWidth, GBufferHeight, DXGI_FORMAT_R8G8B8A8_SNORM);
-		BNInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
-		BNInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		BNInitInfo.ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		ResourceAllocator->Allocate(BNInitInfo, GBufferNormal->GpuResource.get());
 
-		D3D12_RENDER_TARGET_VIEW_DESC RTView;
-		RTView.Format = DXGI_FORMAT_R8G8B8A8_SNORM;
-		RTView.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		RTView.Texture2D.MipSlice = 0;
-		RTView.Texture2D.PlaneSlice = 0;
-		GBufferNormal->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferNormal->GpuResource.get());
-		ViewAllocator->CreateRenderTargetView(GBufferNormal->GpuResource.get(), GBufferNormal->RTV.get(), RTView);
-	
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRView;
-		SRView.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SRView.Format = DXGI_FORMAT_R8G8B8A8_SNORM;
-		SRView.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		SRView.Texture2D.MostDetailedMip = 0;
-		SRView.Texture2D.MipLevels = 1;
-		SRView.Texture2D.PlaneSlice = 0;
-		GBufferNormal->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferNormal->GpuResource.get());
-		ViewAllocator->CreateShaderResourceView(GBufferNormal->GpuResource.get(), GBufferNormal->SRV.get(), SRView);
+		TD3DViewInitInfo RTView = TD3DViewInitInfo::RTView_Texture2D(GBufferNormal->GpuResource.get(), DXGI_FORMAT_R8G8B8A8_SNORM);
+		ViewAllocator->Allocate(GBufferNormal->RTV.get(), RTView);
+
+		TD3DViewInitInfo SRView = TD3DViewInitInfo::SRView_Texture2D(GBufferNormal->GpuResource.get(), DXGI_FORMAT_R8G8B8A8_SNORM);
+		ViewAllocator->Allocate(GBufferNormal->SRV.get(), SRView);
 	}
 
 	{
 		GBufferWorldPos = std::make_unique<TD3DTexture>();
+		GBufferWorldPos->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferWorldPos->GpuResource.get());
+		GBufferWorldPos->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferWorldPos->GpuResource.get());
+
 		TD3DResourceInitInfo BWInitInfo = TD3DResourceInitInfo::Texture2D(GBufferWidth, GBufferHeight, DXGI_FORMAT_R32G32B32A32_FLOAT);
-		BWInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
-		BWInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		BWInitInfo.ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		ResourceAllocator->Allocate(BWInitInfo, GBufferWorldPos->GpuResource.get());
 
-		D3D12_RENDER_TARGET_VIEW_DESC RTView;
-		RTView.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		RTView.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		RTView.Texture2D.MipSlice = 0;
-		RTView.Texture2D.PlaneSlice = 0;
-		GBufferWorldPos->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferWorldPos->GpuResource.get());
-		ViewAllocator->CreateRenderTargetView(GBufferWorldPos->GpuResource.get(), GBufferWorldPos->RTV.get(), RTView);
+		TD3DViewInitInfo RTView = TD3DViewInitInfo::RTView_Texture2D(GBufferWorldPos->GpuResource.get(), DXGI_FORMAT_R32G32B32A32_FLOAT);
+		ViewAllocator->Allocate(GBufferWorldPos->RTV.get(), RTView);
 
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRView;
-		SRView.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SRView.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		SRView.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		SRView.Texture2D.MostDetailedMip = 0;
-		SRView.Texture2D.MipLevels = 1;
-		SRView.Texture2D.PlaneSlice = 0;
-		GBufferWorldPos->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferWorldPos->GpuResource.get());
-		ViewAllocator->CreateShaderResourceView(GBufferWorldPos->GpuResource.get(), GBufferWorldPos->SRV.get(), SRView);
+		TD3DViewInitInfo SRView = TD3DViewInitInfo::SRView_Texture2D(GBufferWorldPos->GpuResource.get(), DXGI_FORMAT_R32G32B32A32_FLOAT);
+		ViewAllocator->Allocate(GBufferWorldPos->SRV.get(), SRView);
+
 	}
-
 
 	{
 		GBufferORM = std::make_unique<TD3DTexture>();
+		GBufferORM->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferORM->GpuResource.get());
+		GBufferORM->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferORM->GpuResource.get());
+
 		TD3DResourceInitInfo BROMInitInfo = TD3DResourceInitInfo::Texture2D(GBufferWidth, GBufferHeight, DXGI_FORMAT_R8G8B8A8_UNORM);
-		BROMInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
-		BROMInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		BROMInitInfo.ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		ResourceAllocator->Allocate(BROMInitInfo, GBufferORM->GpuResource.get());
 
-		D3D12_RENDER_TARGET_VIEW_DESC RTView;
-		RTView.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		RTView.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		RTView.Texture2D.MipSlice = 0;
-		RTView.Texture2D.PlaneSlice = 0;
-		GBufferORM->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferORM->GpuResource.get());
-		ViewAllocator->CreateRenderTargetView(GBufferORM->GpuResource.get(), GBufferORM->RTV.get(), RTView);
+		TD3DViewInitInfo RTView = TD3DViewInitInfo::RTView_Texture2D(GBufferORM->GpuResource.get(), DXGI_FORMAT_R8G8B8A8_UNORM);
+		ViewAllocator->Allocate(GBufferORM->RTV.get(), RTView);
 
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRView;
-		SRView.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SRView.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		SRView.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		SRView.Texture2D.MostDetailedMip = 0;
-		SRView.Texture2D.MipLevels = 1;
-		SRView.Texture2D.PlaneSlice = 0;
-		GBufferORM->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferORM->GpuResource.get());
-		ViewAllocator->CreateShaderResourceView(GBufferORM->GpuResource.get(), GBufferORM->SRV.get(), SRView);
+		TD3DViewInitInfo SRView = TD3DViewInitInfo::SRView_Texture2D(GBufferORM->GpuResource.get(), DXGI_FORMAT_R8G8B8A8_UNORM);
+		ViewAllocator->Allocate(GBufferORM->SRV.get(), SRView);
 	}
 
 	{
 		GBufferVelocity = std::make_unique<TD3DTexture>();
+		GBufferVelocity->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferVelocity->GpuResource.get());
+		GBufferVelocity->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferVelocity->GpuResource.get());
+
 		TD3DResourceInitInfo BVInitInfo = TD3DResourceInitInfo::Texture2D(GBufferWidth, GBufferHeight, DXGI_FORMAT_R16G16_FLOAT);
-		BVInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
-		BVInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		BVInitInfo.ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		ResourceAllocator->Allocate(BVInitInfo, GBufferVelocity->GpuResource.get());
 
-		D3D12_RENDER_TARGET_VIEW_DESC RTView;
-		RTView.Format = DXGI_FORMAT_R16G16_FLOAT;
-		RTView.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		RTView.Texture2D.MipSlice = 0;
-		RTView.Texture2D.PlaneSlice = 0;
-		GBufferVelocity->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferVelocity->GpuResource.get());
-		ViewAllocator->CreateRenderTargetView(GBufferVelocity->GpuResource.get(), GBufferVelocity->RTV.get(), RTView);
+		TD3DViewInitInfo RTView = TD3DViewInitInfo::RTView_Texture2D(GBufferVelocity->GpuResource.get(), DXGI_FORMAT_R16G16_FLOAT);
+		ViewAllocator->Allocate(GBufferVelocity->RTV.get(), RTView);
 
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRView;
-		SRView.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SRView.Format = DXGI_FORMAT_R16G16_FLOAT;
-		SRView.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		SRView.Texture2D.MostDetailedMip = 0;
-		SRView.Texture2D.MipLevels = 1;
-		SRView.Texture2D.PlaneSlice = 0;
-		GBufferVelocity->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferVelocity->GpuResource.get());
-		ViewAllocator->CreateShaderResourceView(GBufferVelocity->GpuResource.get(), GBufferVelocity->SRV.get(), SRView);
+		TD3DViewInitInfo SRView = TD3DViewInitInfo::SRView_Texture2D(GBufferVelocity->GpuResource.get(), DXGI_FORMAT_R16G16_FLOAT);
+		ViewAllocator->Allocate(GBufferVelocity->SRV.get(), SRView);
+
 	}
 
 	{
 		GBufferEmissive = std::make_unique<TD3DTexture>();
+		GBufferEmissive->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferEmissive->GpuResource.get());
+		GBufferEmissive->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferEmissive->GpuResource.get());
+
 		TD3DResourceInitInfo BEInitInfo = TD3DResourceInitInfo::Texture2D(GBufferWidth, GBufferHeight, DXGI_FORMAT_R8G8B8A8_UNORM);
-		BEInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
-		BEInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		BEInitInfo.ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		ResourceAllocator->Allocate(BEInitInfo, GBufferEmissive->GpuResource.get());
 
-		D3D12_RENDER_TARGET_VIEW_DESC RTView;
-		RTView.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		RTView.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		RTView.Texture2D.MipSlice = 0;
-		RTView.Texture2D.PlaneSlice = 0;
-		GBufferEmissive->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), GBufferEmissive->GpuResource.get());
-		ViewAllocator->CreateRenderTargetView(GBufferEmissive->GpuResource.get(), GBufferEmissive->RTV.get(), RTView);
+		TD3DViewInitInfo RTView = TD3DViewInitInfo::RTView_Texture2D(GBufferEmissive->GpuResource.get(), DXGI_FORMAT_R8G8B8A8_UNORM);
+		ViewAllocator->Allocate(GBufferEmissive->RTV.get(), RTView);
 
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRView;
-		SRView.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SRView.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		SRView.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		SRView.Texture2D.MostDetailedMip = 0;
-		SRView.Texture2D.MipLevels = 1;
-		SRView.Texture2D.PlaneSlice = 0;
-		GBufferEmissive->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), GBufferEmissive->GpuResource.get());
-		ViewAllocator->CreateShaderResourceView(GBufferEmissive->GpuResource.get(), GBufferEmissive->SRV.get(), SRView);
+		TD3DViewInitInfo SRView = TD3DViewInitInfo::SRView_Texture2D(GBufferEmissive->GpuResource.get(), DXGI_FORMAT_R8G8B8A8_UNORM);
+		ViewAllocator->Allocate(GBufferEmissive->SRV.get(), SRView);
 	}
 }
 
@@ -649,29 +579,18 @@ void TRender::CreateColorTextures()
 
 	{
 		ColorTexture = std::make_unique<TD3DTexture>();
+		ColorTexture->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), ColorTexture->GpuResource.get());
+		ColorTexture->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), ColorTexture->GpuResource.get());
+
 		TD3DResourceInitInfo BCInitInfo = TD3DResourceInitInfo::Texture2D(ColorTextureWidth, ColorTextureHeight, DXGI_FORMAT_R32G32B32A32_FLOAT);
-		BCInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
-		BCInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		BCInitInfo.ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		ResourceAllocator->Allocate(BCInitInfo, ColorTexture->GpuResource.get());
 
-		D3D12_RENDER_TARGET_VIEW_DESC RTView;
-		RTView.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		RTView.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		RTView.Texture2D.MipSlice = 0;
-		RTView.Texture2D.PlaneSlice = 0;
-		ColorTexture->RTV = std::make_shared<TD3DRenderTargetView>(D3DRHI->GetDevice(), ColorTexture->GpuResource.get());
-		ViewAllocator->CreateRenderTargetView(ColorTexture->GpuResource.get(), ColorTexture->RTV.get(), RTView);
+		TD3DViewInitInfo RTVInfo = TD3DViewInitInfo::RTView_Texture2D(ColorTexture->GpuResource.get(), DXGI_FORMAT_R32G32B32A32_FLOAT);
+		ViewAllocator->Allocate(ColorTexture->RTV.get(), RTVInfo);
 
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRView;
-		SRView.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SRView.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		SRView.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		SRView.Texture2D.MostDetailedMip = 0;
-		SRView.Texture2D.MipLevels = 1;
-		SRView.Texture2D.PlaneSlice = 0;
-		ColorTexture->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), ColorTexture->GpuResource.get());
-		ViewAllocator->CreateShaderResourceView(ColorTexture->GpuResource.get(), ColorTexture->SRV.get(), SRView);
+		TD3DViewInitInfo SRVInfo = TD3DViewInitInfo::SRView_Texture2D(ColorTexture->GpuResource.get(), DXGI_FORMAT_R32G32B32A32_FLOAT);
+		ViewAllocator->Allocate(ColorTexture->SRV.get(), SRVInfo);
 	}
 }
 
@@ -694,13 +613,11 @@ void TRender::UpdatePassConstants()
 	TPassConstants PassConstants;
 	PassConstants.View = View;
 	PassConstants.Proj = Proj;
-	PassConstants.EysPosW = EyePosW;
+	PassConstants.EyePosW = EyePosW;
 
 	auto ResourceAllocator = D3DRHI->GetDevice()->GetResourceAllocator();
 
-	TD3DResourceInitInfo PassCBInitInfo = TD3DResourceInitInfo::Buffer(sizeof(TPassConstants));
-	PassCBInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-	PassCBInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
+	TD3DResourceInitInfo PassCBInitInfo = TD3DResourceInitInfo::Buffer_Default(sizeof(TPassConstants));
 	ResourceAllocator->Allocate(PassCBInitInfo, PassConstBufRef.get());
 
 	D3DRHI->UploadBuffer(PassConstBufRef.get(), &PassConstants, sizeof(TPassConstants));
@@ -732,21 +649,25 @@ void TRender::UpdateLightParameters()
 	uint32_t ElementCount = LightParametersArray.size();
 	uint32_t ElementSize = (uint32_t)(sizeof(TLightParameters));
 
-	// Create LightParameter Buffer
 	LightParametersBufRef = std::make_shared<TD3DResource>();
-	TD3DResourceInitInfo InitInfo = TD3DResourceInitInfo::Buffer(ElementCount * ElementSize);	
+	LightParametersSRVRef = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), LightParametersBufRef.get());
+
+	// Create LightParameter Buffer
+	TD3DResourceInitInfo InitInfo = TD3DResourceInitInfo::Buffer_Default(ElementCount * ElementSize);
 	D3DRHI->GetDevice()->GetResourceAllocator()->Allocate(InitInfo, LightParametersBufRef.get());
 
 	// Create LightParameter SRV
-	D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};
-	SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	SrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	SrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	SrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	SrvDesc.Buffer.StructureByteStride = ElementSize;
-	SrvDesc.Buffer.NumElements = ElementCount;
-	SrvDesc.Buffer.FirstElement = 0;
+	//D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};
+	//SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//SrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	//SrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	//SrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+	//SrvDesc.Buffer.StructureByteStride = ElementSize;
+	//SrvDesc.Buffer.NumElements = ElementCount;
+	//SrvDesc.Buffer.FirstElement = 0;
 
-	LightParametersSRVRef = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), LightParametersBufRef.get());
-	D3DRHI->GetDevice()->GetViewAllocator()->CreateShaderResourceView(LightParametersBufRef.get(), LightParametersSRVRef.get(), SrvDesc);
+	//D3DRHI->GetDevice()->GetViewAllocator()->CreateShaderResourceView(LightParametersBufRef.get(), LightParametersSRVRef.get(), SrvDesc);
+
+	TD3DViewInitInfo SRView = TD3DViewInitInfo::SRView_Buffer(LightParametersBufRef.get(), ElementSize, ElementCount);
+	D3DRHI->GetDevice()->GetViewAllocator()->Allocate(LightParametersSRVRef.get(), SRView);
 }

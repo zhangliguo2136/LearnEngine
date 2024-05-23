@@ -13,39 +13,12 @@ enum class EAllocationStrategy
 class TD3DResourceInitInfo
 {
 public:
-	TD3DResourceInitInfo()
-	{
-		HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-		HeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-		HeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-		HeapProperties.CreationNodeMask = 1;
-		HeapProperties.VisibleNodeMask = 1;
-
-		//HeapDesc.SizeInBytes = DEFAULT_POOL_SIZE;
-		//HeapDesc.Properties = HeapProperties;
-		//HeapDesc.Alignment = 0;
-		//HeapDesc.Flags = D3D12_HEAP_FLAG_NONE;
-
-		ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		ResourceDesc.Alignment = 0;
-		ResourceDesc.Width = 0;
-		ResourceDesc.Height = 0;
-		ResourceDesc.DepthOrArraySize = 1;
-		ResourceDesc.MipLevels = 0;
-		ResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-		ResourceDesc.SampleDesc.Count = 1;
-		ResourceDesc.SampleDesc.Quality = 0;
-		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		//ClearValue.Format = DXGI_FORMAT_UNKNOWN;
-		//ClearValue.Color[0] = 0.f;
-		//ClearValue.Color[1] = 0.f;
-		//ClearValue.Color[2] = 0.f;
-		//ClearValue.Color[3] = 0.f;
-	}
+	TD3DResourceInitInfo();
 
 	static TD3DResourceInitInfo Buffer(uint32_t Size);
+	static TD3DResourceInitInfo Buffer_Upload(uint32_t Size);
+	static TD3DResourceInitInfo Buffer_Default(uint32_t Size);
+
 	static TD3DResourceInitInfo Texture2D(uint32_t Width, uint32_t Height, DXGI_FORMAT Format);
 public:
 	EAllocationStrategy AllocationStrategy = EAllocationStrategy::StandAlone;
@@ -57,7 +30,7 @@ public:
 	D3D12_RESOURCE_DESC ResourceDesc;
 	D3D12_RESOURCE_STATES InitState = D3D12_RESOURCE_STATE_COMMON;
 
-	//D3D12_CLEAR_VALUE ClearValue;
+	D3D12_CLEAR_VALUE ClearValue;
 };
 
 class TD3DResource

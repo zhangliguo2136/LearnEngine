@@ -13,14 +13,27 @@ bool TD3DResourceAllocator::Allocate(const TD3DResourceInitInfo& InitInfo, TD3DR
 {
     if (InitInfo.AllocationStrategy == EAllocationStrategy::StandAlone) 
     {
+
+        D3D12_CLEAR_VALUE* ClearValuePtr = nullptr;
+        if (InitInfo.ResourceDesc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER)
+        {
+            if (InitInfo.ResourceDesc.Flags == D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+                ||InitInfo.ResourceDesc.Flags == D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
+            {
+                D3D12_CLEAR_VALUE ClearValue = InitInfo.ClearValue;
+                ClearValuePtr = &ClearValue;
+            }
+        }
+
         ThrowIfFailed(Device->GetD3DDevice()->CreateCommittedResource(
             &InitInfo.HeapProperties,
-            InitInfo.HeapFlags, 
+            InitInfo.HeapFlags,
             &InitInfo.ResourceDesc,
             InitInfo.InitState,
-            nullptr,
+            ClearValuePtr,
             IID_PPV_ARGS(&OutResource->D3DResource)
         ));
+
 
         OutResource->CurrentState = InitInfo.InitState;
         return true;

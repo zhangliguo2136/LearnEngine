@@ -20,7 +20,7 @@ void TMaterialInstance::UpdateConstants(TD3DRHI* D3DRHI)
 
 	auto ResourceAllocator = D3DRHI->GetDevice()->GetResourceAllocator();
 
-	TD3DResourceInitInfo MatConstInitInfo = TD3DResourceInitInfo::Buffer(sizeof(TMaterialConstant));
+	TD3DResourceInitInfo MatConstInitInfo = TD3DResourceInitInfo::Buffer_Default(sizeof(TMaterialConstant));
 	ResourceAllocator->Allocate(MatConstInitInfo, MaterialConstantsRef.get());
 
 	D3DRHI->UploadBuffer(MaterialConstantsRef.get(), &MatConst, sizeof(TMaterialConstant));

@@ -12,17 +12,17 @@ TD3DViewAllocator::~TD3DViewAllocator()
 {
 }
 
-void TD3DViewAllocator::CreateRenderTargetView(TD3DResource* InResource, TD3DRenderTargetView* InRenderTargetView, D3D12_RENDER_TARGET_VIEW_DESC RTVDesc)
+void TD3DViewAllocator::Allocate(TD3DRenderTargetView* InRenderTarget, TD3DViewInitInfo InitInfo)
 {
-	Device->GetD3DDevice()->CreateRenderTargetView(InResource->D3DResource.Get(), &RTVDesc, InRenderTargetView->GetCpuDescriptorHandle());
+	Device->GetD3DDevice()->CreateRenderTargetView(InitInfo.Resource->D3DResource.Get(), &InitInfo.RTView, InRenderTarget->GetCpuDescriptorHandle());
 }
 
-void TD3DViewAllocator::CreateDepthStencilView(TD3DResource* InResource, TD3DDepthStencilView* InDepthStencilView, D3D12_DEPTH_STENCIL_VIEW_DESC DSVDesc)
+void TD3DViewAllocator::Allocate(TD3DDepthStencilView* InDepthStencilView, TD3DViewInitInfo InitInfo)
 {
-	Device->GetD3DDevice()->CreateDepthStencilView(InResource->D3DResource.Get(), &DSVDesc, InDepthStencilView->GetCpuDescriptorHandle());
+	Device->GetD3DDevice()->CreateDepthStencilView(InitInfo.Resource->D3DResource.Get(), &InitInfo.DSView, InDepthStencilView->GetCpuDescriptorHandle());
 }
 
-void TD3DViewAllocator::CreateShaderResourceView(TD3DResource* InResource, TD3DShaderResourceView* InShaderResourceView, D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc)
+void TD3DViewAllocator::Allocate(TD3DShaderResourceView* InShaderResourceView, TD3DViewInitInfo InitInfo)
 {
-	Device->GetD3DDevice()->CreateShaderResourceView(InResource->D3DResource.Get(), &SRVDesc, InShaderResourceView->GetCpuDescriptorHandle());
+	Device->GetD3DDevice()->CreateShaderResourceView(InitInfo.Resource->D3DResource.Get(), &InitInfo.SRView, InShaderResourceView->GetCpuDescriptorHandle());
 }

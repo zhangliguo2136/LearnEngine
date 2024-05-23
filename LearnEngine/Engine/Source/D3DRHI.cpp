@@ -70,16 +70,22 @@ void TD3DRHI::Destroy()
 {
 }
 
+void TD3DRHI::BeginFrame()
+{
+}
+
+void TD3DRHI::EndFrame()
+{
+	TempUploadBuffers.clear();
+}
+
 void TD3DRHI::UploadBuffer(TD3DResource* DestBuffer, void* Content, uint32_t Size)
 {
 	auto UploadBuffer = std::make_shared<TD3DResource>();
+	TempUploadBuffers.push_back(UploadBuffer);
 
-	TD3DResourceInitInfo UploadBufInitInfo = TD3DResourceInitInfo::Buffer(Size);
-	UploadBufInitInfo.InitState = D3D12_RESOURCE_STATE_GENERIC_READ;
-	UploadBufInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
-
+	TD3DResourceInitInfo UploadBufInitInfo = TD3DResourceInitInfo::Buffer_Upload(Size);
 	Device->GetResourceAllocator()->Allocate(UploadBufInitInfo, UploadBuffer.get());
-	UploadBuffer->D3DResource->AddRef();
 
 	void* MappedData = nullptr;
 	UploadBuffer->D3DResource->Map(0, nullptr, &MappedData);
@@ -87,6 +93,7 @@ void TD3DRHI::UploadBuffer(TD3DResource* DestBuffer, void* Content, uint32_t Siz
 	memcpy_s(MappedData, Size, Content, Size);
 
 	TransitionResource(DestBuffer, D3D12_RESOURCE_STATE_COPY_DEST);
+
 	CommandContent->GetCommandList()->CopyBufferRegion(
 		DestBuffer->D3DResource.Get(),
 		0,
@@ -94,18 +101,12 @@ void TD3DRHI::UploadBuffer(TD3DResource* DestBuffer, void* Content, uint32_t Siz
 		0,
 		Size
 	);
+
 	TransitionResource(DestBuffer, D3D12_RESOURCE_STATE_COMMON);
 }
 
 void TD3DRHI::UploadTexture(TD3DResource* DestTexture, TTextureInfo& SrcTextureInfo)
 {
-	// Upload InitData
-	//D3D12_SUBRESOURCE_DATA SubResData;
-	//SubResData.pData = SrcTextureInfo.Datas.data();
-	//SubResData.RowPitch = SrcTextureInfo.RowBytes;
-	//SubResData.SlicePitch = SrcTextureInfo.TotalBytes;
-
-
 	// 获得纹理图片数据的信息
 	D3D12_RESOURCE_DESC DestDesc = DestTexture->D3DResource->GetDesc();
 	uint32_t nNumSubresources = 1u;	// 只有一幅图片，即子资源个数为1;
@@ -127,13 +128,10 @@ void TD3DRHI::UploadTexture(TD3DResource* DestTexture, TTextureInfo& SrcTextureI
 
 	// 创建上传堆资源
 	auto UploadBuffer = std::make_shared<TD3DResource>();
+	TempUploadBuffers.push_back(UploadBuffer);
 
-	TD3DResourceInitInfo UploadResInitInfo = TD3DResourceInitInfo::Buffer(nRequiredSize);
-	UploadResInitInfo.InitState = D3D12_RESOURCE_STATE_GENERIC_READ;
-	UploadResInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
-
+	TD3DResourceInitInfo UploadResInitInfo = TD3DResourceInitInfo::Buffer_Upload(nRequiredSize);
 	Device->GetResourceAllocator()->Allocate(UploadResInitInfo, UploadBuffer.get());
-	UploadBuffer->D3DResource->AddRef();
 
 	// MemCpy 到上传堆
 	BYTE* UploadData = nullptr;
@@ -164,6 +162,7 @@ void TD3DRHI::UploadTexture(TD3DResource* DestTexture, TTextureInfo& SrcTextureI
 	SrcCpyLocation.pResource = UploadBuffer->D3DResource.Get();
 	SrcCpyLocation.PlacedFootprint = nFootprint;
 	CommandContent->GetCommandList()->CopyTextureRegion(&DstCpyLocation, 0, 0, 0, &SrcCpyLocation, nullptr);
+
 	this->TransitionResource(DestTexture, D3D12_RESOURCE_STATE_COMMON);
 }
 

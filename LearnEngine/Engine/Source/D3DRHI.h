@@ -16,6 +16,9 @@ public:
 	void Initialize(TD3DViewportInfo ViewportInfo);
 	void Destroy();
 
+	void BeginFrame();
+	void EndFrame();
+
 public:
 	TD3DDevice* GetDevice() { return Device.get(); }
 	TD3DViewport* GetViewport() { return Viewport.get(); }
@@ -30,4 +33,7 @@ private:
 	std::unique_ptr<TD3DDevice> Device = nullptr;
 	std::unique_ptr<TD3DCommandContent> CommandContent = nullptr;
 	std::unique_ptr<TD3DViewport> Viewport = nullptr;
+
+private:
+	std::vector<std::shared_ptr<TD3DResource>> TempUploadBuffers;
 };

@@ -14,7 +14,7 @@ struct TPassConstants
 {
 	TMatrix View = TMatrix::Identity;
 	TMatrix Proj = TMatrix::Identity;
-	TVector3f EysPosW = { 0.0f, 0.0f, 0.0f };
+	TVector3f EyePosW = { 0.0f, 0.0f, 0.0f };
 };
 
 struct TObjectConstants

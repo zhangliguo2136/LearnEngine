@@ -36,11 +36,11 @@ public:
 
 		// Add Sky 
 		{
-			auto Sky = AddActor<TSkyActor>("Sky");
-			Sky->SetMaterialInstance("SkyMat_Inst");
-			TTransform Transform;
-			Transform.Scale = TVector3f(5000.0f, 5000.0f, 5000.0f);
-			Sky->SetActorTransform(Transform);
+			//auto Sky = AddActor<TSkyActor>("Sky");
+			//Sky->SetMaterialInstance("SkyMat_Inst");
+			//TTransform Transform;
+			//Transform.Scale = TVector3f(5000.0f, 5000.0f, 5000.0f);
+			//Sky->SetActorTransform(Transform);
 		}
 
 		// Add CyborgWeapon

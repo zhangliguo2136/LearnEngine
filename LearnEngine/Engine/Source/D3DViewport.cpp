@@ -82,54 +82,36 @@ void TD3DViewport::UpdateViewportSize(uint32_t Width, uint32_t Height)
 
 		TD3DTextureRef TextureRef = std::make_shared<TD3DTexture>();
 		TextureRef->GpuResource = std::make_shared<TD3DResource>(SwapChainBuffer, D3D12_RESOURCE_STATE_PRESENT);
+		TextureRef->RTV = std::make_shared<TD3DRenderTargetView>(D3DDevice, TextureRef->GpuResource.get());
 		RenderTargetTextures[i] = TextureRef;
 
 		D3D12_RESOURCE_DESC BackBufferDesc = SwapChainBuffer->GetDesc();
-		// Create RTV Of Texture
-		D3D12_RENDER_TARGET_VIEW_DESC RtvDesc = {};
-		RtvDesc.Format = BackBufferDesc.Format;
-		RtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		RtvDesc.Texture2D.MipSlice = 0;
-		RtvDesc.Texture2D.PlaneSlice = 0;
 
-		auto RTView = std::make_shared<TD3DRenderTargetView>(D3DDevice, TextureRef->GpuResource.get());
-		ViewAllocator->CreateRenderTargetView(TextureRef->GpuResource.get(), RTView.get(), RtvDesc);
-		TextureRef->RTV = RTView;
+		TD3DViewInitInfo RTViewInfo = TD3DViewInitInfo::RTView_Texture2D(TextureRef->GpuResource.get(), BackBufferDesc.Format);
+		ViewAllocator->Allocate(TextureRef->RTV.get(), RTViewInfo);
 	}
 
 	// Create DepthStencilTexture
 	{
 		TD3DTextureRef TextureRef = std::make_shared<TD3DTexture>();
+		TextureRef->DSV = std::make_shared<TD3DDepthStencilView>(D3DDevice, TextureRef->GpuResource.get());
+		TextureRef->SRV = std::make_shared<TD3DShaderResourceView>(D3DDevice, TextureRef->GpuResource.get());
+		DepthStencilTexture = TextureRef;
 
 		// Create Resource Of Texture
 		TD3DResourceInitInfo ResInitInfo = TD3DResourceInitInfo::Texture2D(ViewportInfo.Width, ViewportInfo.Height, DXGI_FORMAT_R24G8_TYPELESS);
 		ResInitInfo.ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-		ResInitInfo.ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		ResInitInfo.InitState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		ResInitInfo.ClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		ResourceAllocator->Allocate(ResInitInfo, TextureRef->GpuResource.get());
 
 		// Create DSV Of Texture
-		D3D12_DEPTH_STENCIL_VIEW_DESC DSVDesc = {};
-		DSVDesc.Flags = D3D12_DSV_FLAG_NONE;
-		DSVDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-		DSVDesc.Texture2D.MipSlice = 0;
-		DSVDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		auto DSView = std::make_shared<TD3DDepthStencilView>(D3DDevice, TextureRef->GpuResource.get());
-		ViewAllocator->CreateDepthStencilView(TextureRef->GpuResource.get(), DSView.get(), DSVDesc);
-		TextureRef->DSV = DSView;
+		TD3DViewInitInfo DSViewInfo = TD3DViewInitInfo::DSView_Texture2D(TextureRef->GpuResource.get(), DXGI_FORMAT_D24_UNORM_S8_UINT);
+		ViewAllocator->Allocate(TextureRef->DSV.get(), DSViewInfo);
 
 		// Create SRV Of Texture
-		D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};
-		SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-		SrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		SrvDesc.Texture2D.MostDetailedMip = 0;
-		SrvDesc.Texture2D.MipLevels = 1;
-		auto SRView = std::make_shared<TD3DShaderResourceView>(D3DDevice, TextureRef->GpuResource.get());
-		ViewAllocator->CreateShaderResourceView(TextureRef->GpuResource.get(), SRView.get(), SrvDesc);
-		TextureRef->SRV = SRView;
-
-		DepthStencilTexture = TextureRef;
+		TD3DViewInitInfo SRViewInfo = TD3DViewInitInfo::SRView_Texture2D(TextureRef->GpuResource.get(), DXGI_FORMAT_R24_UNORM_X8_TYPELESS);
+		ViewAllocator->Allocate(TextureRef->SRV.get(), SRViewInfo);
 	}
 
 	D3DCommandContent->ExecuteCommandList();

@@ -1,5 +1,6 @@
 #include "Sampler.hlsl"
 #include "Material.hlsl"
+#include "Common.hlsl"
 
 Texture2D BaseColorTexture;
 Texture2D NormalTexture;
@@ -28,7 +29,7 @@ struct VertexOut
 VertexOut VS(VertexIn vin)
 {
     VertexOut Out = (VertexOut) 0.0f;
-    
+
     return Out;
 }
 
