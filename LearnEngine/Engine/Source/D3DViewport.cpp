@@ -51,7 +51,7 @@ void TD3DViewport::InitSwapChain()
 void TD3DViewport::Present()
 {
 	ThrowIfFailed(DXGISwapChain->Present(0, 0));
-	CurrBackBufferIndex = (CurrBackBufferIndex - 1) % SwapChainBufferCount;
+	CurrBackBufferIndex = (CurrBackBufferIndex + 1) % SwapChainBufferCount;
 }
 
 void TD3DViewport::UpdateViewportSize(uint32_t Width, uint32_t Height)
@@ -102,7 +102,6 @@ void TD3DViewport::UpdateViewportSize(uint32_t Width, uint32_t Height)
 		TD3DResourceInitInfo ResInitInfo = TD3DResourceInitInfo::Texture2D(ViewportInfo.Width, ViewportInfo.Height, DXGI_FORMAT_R24G8_TYPELESS);
 		ResInitInfo.ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 		ResInitInfo.InitState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
-		ResInitInfo.ClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		ResourceAllocator->Allocate(ResInitInfo, TextureRef->GpuResource.get());
 
 		// Create DSV Of Texture
@@ -133,4 +132,9 @@ void TD3DViewport::GetD3DViewport(D3D12_VIEWPORT& OutD3DViewPort, D3D12_RECT& Ou
 TD3DDepthStencilView* TD3DViewport::GetDepthStencilView()
 {
 	return DepthStencilTexture->DSV.get();
+}
+
+TD3DTextureRef TD3DViewport::GetCurrentBackRT()
+{
+	return RenderTargetTextures[CurrBackBufferIndex];
 }

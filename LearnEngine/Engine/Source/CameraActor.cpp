@@ -17,3 +17,8 @@ TCameraComponent* TCameraActor::GetCameraComponent()
 {
 	return CameraComponent;
 }
+
+void TCameraActor::Tick(float dt)
+{
+	CameraComponent->UpdateViewMatrix();
+}

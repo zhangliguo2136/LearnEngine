@@ -1,8 +1,9 @@
 #include "D3DResource.h"
+#include <iostream>
 
-TD3DResource::TD3DResource()
+TD3DResource::TD3DResource(std::string InName)
+	:Name(InName)
 {
-
 }
 
 TD3DResource::TD3DResource(Microsoft::WRL::ComPtr<ID3D12Resource> InD3DResource, D3D12_RESOURCE_STATES InState)
@@ -38,14 +39,6 @@ TD3DResourceInitInfo::TD3DResourceInitInfo()
 	ResourceDesc.SampleDesc.Quality = 0;
 	ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-	ClearValue.Format = DXGI_FORMAT_UNKNOWN;
-	ClearValue.Color[0] = 0.f;
-	ClearValue.Color[1] = 0.f;
-	ClearValue.Color[2] = 0.f;
-	ClearValue.Color[3] = 0.f;
-	ClearValue.DepthStencil.Depth = 1.0f;
-	ClearValue.DepthStencil.Stencil = 0;
 }
 
 TD3DResourceInitInfo TD3DResourceInitInfo::Buffer(uint32_t Size)
@@ -90,8 +83,6 @@ TD3DResourceInitInfo TD3DResourceInitInfo::Texture2D(uint32_t Width, uint32_t He
 	InitInfo.ResourceDesc.Format = Format;
 	InitInfo.ResourceDesc.MipLevels = 1;
 	InitInfo.ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-
-	InitInfo.ClearValue.Format = Format;
 
 	return InitInfo;
 }

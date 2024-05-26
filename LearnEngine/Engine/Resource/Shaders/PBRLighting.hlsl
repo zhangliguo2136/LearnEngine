@@ -1,4 +1,3 @@
-static const uint LightCount = 0;
 const static float PI = 3.14159265359;
 
 struct LightParameters
@@ -8,6 +7,11 @@ struct LightParameters
 
     uint LightType;
     float3 Direction;
+};
+
+cbuffer LightCommon
+{
+    uint LightCount;
 };
 
 //D:法线分布函数 (Trowbridge-Reitz)

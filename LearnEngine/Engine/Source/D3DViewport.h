@@ -42,6 +42,7 @@ public:
 	void GetD3DViewport(D3D12_VIEWPORT& OutD3DViewPort, D3D12_RECT& OutD3DRect);
 
 	TD3DDepthStencilView* GetDepthStencilView();
+	TD3DTextureRef GetCurrentBackRT();
 private:
 	static const int SwapChainBufferCount = 2;
 	int CurrBackBufferIndex = 0;

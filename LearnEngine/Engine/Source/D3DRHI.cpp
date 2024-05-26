@@ -89,8 +89,8 @@ void TD3DRHI::UploadBuffer(TD3DResource* DestBuffer, void* Content, uint32_t Siz
 
 	void* MappedData = nullptr;
 	UploadBuffer->D3DResource->Map(0, nullptr, &MappedData);
-
 	memcpy_s(MappedData, Size, Content, Size);
+	UploadBuffer->D3DResource->Unmap(0, nullptr);
 
 	TransitionResource(DestBuffer, D3D12_RESOURCE_STATE_COPY_DEST);
 
@@ -134,19 +134,31 @@ void TD3DRHI::UploadTexture(TD3DResource* DestTexture, TTextureInfo& SrcTextureI
 	Device->GetResourceAllocator()->Allocate(UploadResInitInfo, UploadBuffer.get());
 
 	// MemCpy µ½ÉÏ´«¶Ñ
-	BYTE* UploadData = nullptr;
-	UploadBuffer->D3DResource->Map(0, NULL, reinterpret_cast<void**>(&UploadData));
+	BYTE* MappedData = nullptr;
+	UploadBuffer->D3DResource->Map(0, NULL, reinterpret_cast<void**>(&MappedData));
 
-	BYTE* pDestSlice = reinterpret_cast<BYTE*>(UploadData) + nFootprint.Offset;
-	BYTE* pSrcSlice = reinterpret_cast<BYTE*>(SrcTextureInfo.Datas.data());
-	for (uint32_t y = 0; y < nTextureRowNum; ++y)
+	D3D12_SUBRESOURCE_DATA MemCpySrc = {};
+	MemCpySrc.pData = SrcTextureInfo.Datas.data();
+	MemCpySrc.RowPitch = SrcTextureInfo.RowBytes;
+	MemCpySrc.SlicePitch = SrcTextureInfo.TotalBytes;
+
+	D3D12_MEMCPY_DEST MemCpyDest = {};
+	MemCpyDest.pData = (BYTE*)MappedData + nFootprint.Offset;
+	MemCpyDest.RowPitch = nFootprint.Footprint.RowPitch;
+	MemCpyDest.SlicePitch = nFootprint.Footprint.RowPitch * nTextureRowNum;
+
+	for (UINT z = 0; z < nFootprint.Footprint.Depth; ++z)
 	{
-		memcpy(
-			pDestSlice + static_cast<SIZE_T> (nFootprint.Footprint.RowPitch) * y,
-			pSrcSlice + static_cast<SIZE_T>(SrcTextureInfo.RowBytes) * y,
-			SrcTextureInfo.RowBytes
-		);
+		auto pDestSlice = static_cast<BYTE*>(MemCpyDest.pData) + MemCpyDest.SlicePitch * z;
+		auto pSrcSlice = static_cast<const BYTE*>(MemCpySrc.pData) + MemCpySrc.SlicePitch * LONG_PTR(z);
+		for (UINT y = 0; y < nTextureRowNum; ++y)
+		{
+			memcpy(pDestSlice + MemCpyDest.RowPitch * y,
+				pSrcSlice + MemCpySrc.RowPitch * LONG_PTR(y),
+				nTextureRowSize);
+		}
 	}
+
 	UploadBuffer->D3DResource->Unmap(0, NULL);
 
 	this->TransitionResource(DestTexture, D3D12_RESOURCE_STATE_COPY_DEST);

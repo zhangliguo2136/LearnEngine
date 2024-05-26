@@ -33,20 +33,20 @@ Texture2D EmissiveGbuffer;
 
 StructuredBuffer<LightParameters> Lights;
 
-float4 PS(VertexOut pin):SV_TARGET
+float4 PS(VertexOut pin): SV_TARGET
 {
-    float3 FinalColor = 0.0f;
+    float3 FinalColor = 0.f;
     
     // ShadingModel
     float ShadingModelValue = WorldPosGbuffer.Sample(SamplerPointClamp, pin.TexC).a;
-    uint ShadingModel = (uint) round(ShadingModelValue * (float) 0xf);
+    uint ShadingModel = (uint) round(ShadingModelValue* (float)0xf);
     
     //GBuffer
     float3 BaseColor = BaseColorGbuffer.Sample(SamplerPointClamp, pin.TexC).rgb;
     float3 Normal = NormalGbuffer.Sample(SamplerPointClamp, pin.TexC).rgb;
     float3 WorldPos = WorldPosGbuffer.Sample(SamplerPointClamp, pin.TexC).rgb;
     
-    
+    // 金属度和粗糙度
     float Roughness = OrmGbuffer.Sample(SamplerPointClamp, pin.TexC).g;
     float Metallic = OrmGbuffer.Sample(SamplerPointClamp, pin.TexC).b;
     
@@ -78,7 +78,6 @@ float4 PS(VertexOut pin):SV_TARGET
                 FinalColor += DirectLighting(Radiance, LightDir, ViewDir, Normal, BaseColor, Roughness, Metallic);
             }
         }
-
     }
     // UnLit
     else if (ShadingModel == 1)

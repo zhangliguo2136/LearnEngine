@@ -12,7 +12,9 @@ void TMesh::GenerateIndices16()
 	{
 		Indices16.resize(Indices32.size());
 		for (size_t i = 0; i < Indices32.size(); ++i)
+		{
 			Indices16[i] = static_cast<uint16_t>(Indices32[i]);
+		}
 	}
 }
 

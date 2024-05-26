@@ -10,7 +10,9 @@ class TWorld
 public:
 	TWorld();
 
+	void BeginFrame();
 	void Update(float dt);
+	void EndFrame();
 
 public:
 	template<typename T>

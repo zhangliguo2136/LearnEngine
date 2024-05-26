@@ -20,10 +20,10 @@ void TMaterialRepository::Load()
 		{
 			{
 				TMaterialInstance* CyborgWeaponMatInst = CreateMaterialInstance(DefaultMat, "CyborgWeaponMat_Inst");
-				CyborgWeaponMatInst->TextureMap.emplace("BaseColorTexture", "CyborgWeapon_BaseColor");
-				CyborgWeaponMatInst->TextureMap.emplace("NormalTexture", "CyborgWeapon_Normal");
-				CyborgWeaponMatInst->TextureMap.emplace("MetallicTexture", "CyborgWeapon_Metallic");
-				CyborgWeaponMatInst->TextureMap.emplace("RoughnessTexture", "CyborgWeapon_Roughness");
+				CyborgWeaponMatInst->TextureMap.at("BaseColorTexture") = "CyborgWeapon_BaseColor";
+				CyborgWeaponMatInst->TextureMap.at("NormalTexture") = "CyborgWeapon_Normal";
+				CyborgWeaponMatInst->TextureMap.at("MetallicTexture") = "CyborgWeapon_Metallic";
+				CyborgWeaponMatInst->TextureMap.at("RoughnessTexture") = "CyborgWeapon_Roughness";
 			}
 		}
 	}

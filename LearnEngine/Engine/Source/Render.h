@@ -6,6 +6,7 @@
 #include "D3DTexture.h"
 #include "MeshBatch.h"
 #include "PipelineState.h"
+#include "D3DBuffer.h"
 
 class TD3DRHI;
 class TWorld;
@@ -22,6 +23,7 @@ public:
 private:
 	void BasePass();
 	void DeferredLightingPass();
+	void PostProcessPass();
 
 private:
 	// D3DRHI
@@ -47,6 +49,12 @@ private:
 	std::unique_ptr<TShader> DeferredLightingShader = nullptr;
 	TGraphicsPSODescriptor DeferredLightingPSODescriptor;
 
+	std::unique_ptr<TShader> PostProcessShader = nullptr;
+	TGraphicsPSODescriptor PostProcessPSODescriptor;
+
+	std::unique_ptr<TShader> BasePassShader = nullptr;
+	TGraphicsPSODescriptor BasePassPSODescriptor;
+
 private:
 	void CreateMeshProxys();
 	void CreateTextures();
@@ -59,11 +67,13 @@ private:
 	void UpdateLightParameters();
 private:
 	std::shared_ptr<TD3DResource> PassConstBufRef = nullptr;
-	std::shared_ptr<TD3DResource> LightParametersBufRef = nullptr;
-	std::shared_ptr<TD3DShaderResourceView> LightParametersSRVRef = nullptr;
+	std::shared_ptr<TD3DBuffer> LightParametersBufRef = nullptr;
+	std::shared_ptr<TD3DResource> LightCommonBufRef = nullptr;
+	//std::shared_ptr<TD3DShaderResourceView> LightParametersSRVRef = nullptr;
 
 private:
 	std::vector<TMeshBatch> MeshBatchs;
+	std::unordered_map<TGraphicsPSODescriptor, std::vector<TMeshCommand>> BaseMeshCommandMap;
 
 	// Mesh
 	std::unordered_map<std::string, TMeshProxy> MeshProxyMap;

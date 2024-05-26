@@ -5,7 +5,7 @@
 #include <wrl/module.h>
 #include "Shader.h"
 
-struct TGraphicsPSODescriptor
+class TGraphicsPSODescriptor
 {
 public:
 	TGraphicsPSODescriptor();
@@ -16,6 +16,13 @@ public:
 			&& Other.Shader == Shader
 			&& Other.PrimitiveTopologyType == PrimitiveTopologyType;
 	}
+
+public:
+	static D3D12_BLEND_DESC DefaultBlend();
+	static D3D12_RASTERIZER_DESC DefaultRasterizer();
+	static D3D12_DEPTH_STENCIL_DESC DefaultDepthStencil();
+	static DXGI_SAMPLE_DESC DefaultDXGISample();
+
 public:
 	std::string InputLayoutName;
 	TShader* Shader = nullptr;

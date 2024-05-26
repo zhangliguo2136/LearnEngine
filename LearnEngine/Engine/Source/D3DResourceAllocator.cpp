@@ -17,10 +17,24 @@ bool TD3DResourceAllocator::Allocate(const TD3DResourceInitInfo& InitInfo, TD3DR
         D3D12_CLEAR_VALUE* ClearValuePtr = nullptr;
         if (InitInfo.ResourceDesc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER)
         {
-            if (InitInfo.ResourceDesc.Flags == D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
-                ||InitInfo.ResourceDesc.Flags == D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
+            if (InitInfo.ResourceDesc.Flags == D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
             {
-                D3D12_CLEAR_VALUE ClearValue = InitInfo.ClearValue;
+                D3D12_CLEAR_VALUE ClearValue;
+                ClearValue.Format = InitInfo.ResourceDesc.Format;
+                ClearValue.Color[0] = 0.0f;
+                ClearValue.Color[1] = 0.0f;
+                ClearValue.Color[2] = 0.0f;
+                ClearValue.Color[3] = 1.0f;
+
+                ClearValuePtr = &ClearValue;
+            }
+            else if (InitInfo.ResourceDesc.Flags == D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)
+            {
+                D3D12_CLEAR_VALUE ClearValue;
+                ClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+                ClearValue.DepthStencil.Depth = 1.0f;;
+                ClearValue.DepthStencil.Stencil = 0;
+     
                 ClearValuePtr = &ClearValue;
             }
         }

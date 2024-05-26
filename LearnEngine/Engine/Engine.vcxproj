@@ -49,11 +49,17 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </EntryPointName>
     </FxCompile>
+    <FxCompile Include="Resource\Shaders\PostProcess.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Resource\Shaders\Sampler.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </EntryPointName>
+    </FxCompile>
+    <FxCompile Include="Resource\Shaders\Utils.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +67,7 @@
     <ClCompile Include="Source\CameraActor.cpp" />
     <ClCompile Include="Source\CameraComponent.cpp" />
     <ClCompile Include="Source\Component.cpp" />
+    <ClCompile Include="Source\D3DBuffer.cpp" />
     <ClCompile Include="Source\D3DCommandContent.cpp" />
     <ClCompile Include="Source\D3DDescriptor.cpp" />
     <ClCompile Include="Source\D3DDescriptorAllocator.cpp" />
@@ -114,6 +121,7 @@
     <ClInclude Include="Source\CameraActor.h" />
     <ClInclude Include="Source\CameraComponent.h" />
     <ClInclude Include="Source\Component.h" />
+    <ClInclude Include="Source\D3DBuffer.h" />
     <ClInclude Include="Source\D3DCommandContent.h" />
     <ClInclude Include="Source\D3DDescriptor.h" />
     <ClInclude Include="Source\D3DDescriptorAllocator.h" />
@@ -264,7 +272,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;FBXSDK_SHARED;SOLUTION_DIR=R"($(SolutionDir))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>

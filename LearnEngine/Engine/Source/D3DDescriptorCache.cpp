@@ -30,15 +30,16 @@ void TD3DDescriptorCache::AppendDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE Type, con
 
 	uint32_t SlotsNeeded = (uint32_t)SrcDescriptors.size();
 
-	OutDescriptor.CpuHandle = { Heap.Heap->GetCPUDescriptorHandleForHeapStart().ptr + INT64(Heap.DescriptorOffset) * INT64(Heap.DescriptorSize) };
-	OutDescriptor.GpuHandle = { Heap.Heap->GetGPUDescriptorHandleForHeapStart().ptr + INT64(Heap.DescriptorOffset) * INT64(Heap.DescriptorSize) };
-
+	D3D12_CPU_DESCRIPTOR_HANDLE CpuHandle = { Heap.Heap->GetCPUDescriptorHandleForHeapStart().ptr + INT64(Heap.DescriptorOffset) * INT64(Heap.DescriptorSize) };
 	std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> SrcCpuDescriptors;
 	for (auto& Descriptor : SrcDescriptors)
 	{
 		SrcCpuDescriptors.push_back(Descriptor.CpuHandle);
 	}
-	Device->GetD3DDevice()->CopyDescriptors(1, &OutDescriptor.CpuHandle, &SlotsNeeded, SlotsNeeded, SrcCpuDescriptors.data(), nullptr, Type);
+	Device->GetD3DDevice()->CopyDescriptors(1, &CpuHandle, &SlotsNeeded, SlotsNeeded, SrcCpuDescriptors.data(), nullptr, Type);
+
+	OutDescriptor.CpuHandle = { Heap.Heap->GetCPUDescriptorHandleForHeapStart().ptr + INT64(Heap.DescriptorOffset) * INT64(Heap.DescriptorSize) };
+	OutDescriptor.GpuHandle = { Heap.Heap->GetGPUDescriptorHandleForHeapStart().ptr + INT64(Heap.DescriptorOffset) * INT64(Heap.DescriptorSize) };
 
 	Heap.DescriptorOffset += SlotsNeeded;
 }

@@ -9,7 +9,11 @@ public:
 
 	~TDirectionalLightActor();
 public:
+	virtual void SetActorTransform(const TTransform& NewTransform) override;
+
 	TVector3f GetLightDirection() const;
+
+	void SetLightDirection(TRotator Rotation);
 
 private:
 	TVector3f Direction;

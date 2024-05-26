@@ -247,6 +247,7 @@ Microsoft::WRL::ComPtr<ID3DBlob> TShader::Compile(const std::string& Filename, c
 	{
 		OutputDebugStringA((char*)Errors->GetBufferPointer());
 	}
+	printf("TShader: %s", Filename.c_str());
 
 	ThrowIfFailed(hr);
 
@@ -261,9 +262,9 @@ void TShader::GetShaderParameters(Microsoft::WRL::ComPtr<ID3DBlob> PassBlob, ESh
 	D3D12_SHADER_DESC ShaderDesc;
 	Reflection->GetDesc(&ShaderDesc);
 
-	//printf("ShaderName: %s \n", ShaderInfo.ShaderName.c_str());
+	printf("ShaderName: %s \n", ShaderInfo.ShaderName.c_str());
 
-	for (UINT i = 0; i < ShaderDesc.BoundResources; i++)
+	for (uint32_t i = 0; i < ShaderDesc.BoundResources; i++)
 	{
 		D3D12_SHADER_INPUT_BIND_DESC  ResourceDesc;
 		Reflection->GetResourceBindingDesc(i, &ResourceDesc);

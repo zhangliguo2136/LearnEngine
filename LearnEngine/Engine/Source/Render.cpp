@@ -65,6 +65,8 @@ void TRender::Draw(float dt)
 	this->BasePass();
 	// 延迟光照
 	this->DeferredLightingPass();
+	// 后处理
+	this->PostProcessPass();
 
 	D3DRHI->GetCommandContent()->ExecuteCommandList();
 	D3DRHI->GetViewport()->Present();
@@ -79,6 +81,8 @@ void TRender::BasePass()
 
 	// GatherAllMeshBatchs
 	MeshBatchs.clear();
+	BaseMeshCommandMap.clear();
+
 	auto Actors = World->GetActors();
 	std::vector<TMeshComponent*> AllMeshComponents;
 	for (auto Actor : Actors)
@@ -89,6 +93,7 @@ void TRender::BasePass()
 			AllMeshComponents.push_back(MeshComponent);
 		}
 	}
+
 	// Generate MeshBatchs
 	for (auto MeshComponent : AllMeshComponents)
 	{
@@ -106,19 +111,19 @@ void TRender::BasePass()
 
 		MeshBatch.ObjConstantsRef = std::make_shared<TD3DResource>();// = ObjConstant;
 
-		TD3DResourceInitInfo ObjConstInitInfo = TD3DResourceInitInfo::Buffer_Default(sizeof(TObjectConstants));
-		ObjConstInitInfo.HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-		ObjConstInitInfo.InitState = D3D12_RESOURCE_STATE_COMMON;
+		TD3DResourceInitInfo ObjConstInitInfo = TD3DResourceInitInfo::Buffer_Upload(sizeof(TObjectConstants));
 		ResourceAllocator->Allocate(ObjConstInitInfo, MeshBatch.ObjConstantsRef.get());
 
-		D3DRHI->UploadBuffer(MeshBatch.ObjConstantsRef.get(), &ObjConstant, sizeof(TObjectConstants));
+		void* MappedData = nullptr;
+		MeshBatch.ObjConstantsRef->D3DResource->Map(0, nullptr, &MappedData);
+		memcpy_s(MappedData, sizeof(TObjectConstants), &ObjConstant, sizeof(TObjectConstants));
+		MeshBatch.ObjConstantsRef->D3DResource->Unmap(0, nullptr);
 
 		//Add to list
 		MeshBatchs.emplace_back(MeshBatch);
 	}
 
 	// 创建 MeshCommand;
-	std::unordered_map<TGraphicsPSODescriptor, std::vector<TMeshCommand>> BaseMeshCommandMap;
 	for (const TMeshBatch& MeshBatch : MeshBatchs)
 	{
 		auto MaterialInstance = MeshBatch.MeshComponent->GetMaterialInstance();
@@ -158,11 +163,14 @@ void TRender::BasePass()
 		BaseMeshCommandMap[Descriptor].emplace_back(MeshCommand);
 	}
 
+	auto CommandList = D3DRHI->GetCommandContent()->GetCommandList();
+
 	// Use screen viewport 
 	D3D12_VIEWPORT ScreenViewport;
 	D3D12_RECT ScissorRect;
-	D3DRHI->GetCommandContent()->GetCommandList()->RSSetViewports(1, &ScreenViewport);
-	D3DRHI->GetCommandContent()->GetCommandList()->RSSetScissorRects(1, &ScissorRect);
+	D3DRHI->GetViewport()->GetD3DViewport(ScreenViewport, ScissorRect);
+	CommandList->RSSetViewports(1, &ScreenViewport);
+	CommandList->RSSetScissorRects(1, &ScissorRect);
 
 	// 设置BasePass RenderTarget(GBuffer)
 	D3DRHI->TransitionResource(GBufferBaseColor->GpuResource.get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -172,22 +180,34 @@ void TRender::BasePass()
 	D3DRHI->TransitionResource(GBufferVelocity->GpuResource.get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 	D3DRHI->TransitionResource(GBufferEmissive->GpuResource.get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	std::vector<TD3DDescriptor> RtvDescriptors;
-	RtvDescriptors.push_back(GBufferBaseColor->RTV->GetDescriptor());
-	RtvDescriptors.push_back(GBufferNormal->RTV->GetDescriptor());
-	RtvDescriptors.push_back(GBufferWorldPos->RTV->GetDescriptor());
-	RtvDescriptors.push_back(GBufferORM->RTV->GetDescriptor());
-	RtvDescriptors.push_back(GBufferVelocity->RTV->GetDescriptor());
-	RtvDescriptors.push_back(GBufferEmissive->RTV->GetDescriptor());
+	// Clear renderTargets
+	const float ClearValue[4] = { 0.f, 0.f, 0.f, 1.f };
+	CommandList->ClearRenderTargetView(GBufferBaseColor->RTV->GetCpuDescriptorHandle(), ClearValue, 0, nullptr);
+	CommandList->ClearRenderTargetView(GBufferNormal->RTV->GetCpuDescriptorHandle(), ClearValue, 0, nullptr);
+	CommandList->ClearRenderTargetView(GBufferWorldPos->RTV->GetCpuDescriptorHandle(), ClearValue, 0, nullptr);
+	CommandList->ClearRenderTargetView(GBufferORM->RTV->GetCpuDescriptorHandle(), ClearValue, 0, nullptr);
+	CommandList->ClearRenderTargetView(GBufferVelocity->RTV->GetCpuDescriptorHandle(), ClearValue, 0, nullptr);
+	CommandList->ClearRenderTargetView(GBufferEmissive->RTV->GetCpuDescriptorHandle(), ClearValue, 0, nullptr);
+
+
+	std::vector<TD3DDescriptor> RTVDescriptors;
+	RTVDescriptors.push_back(GBufferBaseColor->RTV->GetDescriptor());
+	RTVDescriptors.push_back(GBufferNormal->RTV->GetDescriptor());
+	RTVDescriptors.push_back(GBufferWorldPos->RTV->GetDescriptor());
+	RTVDescriptors.push_back(GBufferORM->RTV->GetDescriptor());
+	RTVDescriptors.push_back(GBufferVelocity->RTV->GetDescriptor());
+	RTVDescriptors.push_back(GBufferEmissive->RTV->GetDescriptor());
 
 	auto DescriptorCache = D3DRHI->GetCommandContent()->GetDescriptorCache();
+
 	TD3DDescriptor RTVDescriptor;
-	DescriptorCache->AppendDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RtvDescriptors, RTVDescriptor);
+	DescriptorCache->AppendDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTVDescriptors, RTVDescriptor);
+
 	TD3DDescriptor DSVDescriptor;
 	DSVDescriptor = D3DRHI->GetViewport()->GetDepthStencilView()->GetDescriptor();
 
-	D3DRHI->GetCommandContent()->GetCommandList()->ClearDepthStencilView(DSVDescriptor.CpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-	D3DRHI->GetCommandContent()->GetCommandList()->OMSetRenderTargets(GBufferCount, &RTVDescriptor.CpuHandle, true, &DSVDescriptor.CpuHandle);
+	CommandList->ClearDepthStencilView(DSVDescriptor.CpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	CommandList->OMSetRenderTargets(GBufferCount, &RTVDescriptor.CpuHandle, true, &DSVDescriptor.CpuHandle);
 
 	// 绘制所有的网格
 	for (const auto& Pair : BaseMeshCommandMap)
@@ -196,11 +216,11 @@ void TRender::BasePass()
 		const std::vector<TMeshCommand> MeshCommands = Pair.second;
 
 		// 设置PSO
-		D3DRHI->GetCommandContent()->GetCommandList()->SetPipelineState(GraphicsPSOManager->FindAndCreate(PSODescriptor));
+		CommandList->SetPipelineState(GraphicsPSOManager->FindAndCreate(PSODescriptor));
 
 		// 设置根签名(应该在绑定参数之前设置)
 		TShader* Shader = PSODescriptor.Shader;
-		D3DRHI->GetCommandContent()->GetCommandList()->SetGraphicsRootSignature(Shader->RootSignature.Get());
+		CommandList->SetGraphicsRootSignature(Shader->RootSignature.Get());
 
 		for (const TMeshCommand& MeshCommand : MeshCommands)
 		{
@@ -258,7 +278,8 @@ void TRender::DeferredLightingPass()
 	TD3DDescriptor DSVDescriptor;
 	DSVDescriptor = D3DRHI->GetViewport()->GetDepthStencilView()->GetDescriptor();
 
-
+	const float ClearValue[4] = { 0.f, 0.f, 0.f, 1.f };
+	D3DRHI->GetCommandContent()->GetCommandList()->ClearRenderTargetView(RTVHandle, ClearValue, 0, nullptr);
 	// Specify the buffers we are going to render to.
 	D3DRHI->GetCommandContent()->GetCommandList()->OMSetRenderTargets(1, &RTVHandle, true, &DSVDescriptor.CpuHandle);
 
@@ -271,12 +292,15 @@ void TRender::DeferredLightingPass()
 	
 	//-------------------------------------Set paramters-------------------------------------------
 	Shader->SetParameter("cbPass", PassConstBufRef.get());
+
 	Shader->SetParameter("BaseColorGbuffer", GBufferBaseColor->SRV.get());
 	Shader->SetParameter("NormalGbuffer", GBufferNormal->SRV.get());
 	Shader->SetParameter("WorldPosGbuffer", GBufferWorldPos->SRV.get());
 	Shader->SetParameter("OrmGbuffer", GBufferORM->SRV.get());
 	Shader->SetParameter("EmissiveGbuffer", GBufferEmissive->SRV.get());
-	Shader->SetParameter("Lights", LightParametersSRVRef.get());
+
+	Shader->SetParameter("LightCommon", LightCommonBufRef.get());
+	Shader->SetParameter("Lights", LightParametersBufRef->SRV.get());
 
 	// Bind paramters
 	Shader->BindParameters();
@@ -309,6 +333,71 @@ void TRender::DeferredLightingPass()
 
 	// Transition to PRESENT state.
 	D3DRHI->TransitionResource(ColorTexture->GpuResource.get(), D3D12_RESOURCE_STATE_PRESENT);
+}
+
+void TRender::PostProcessPass()
+{
+	auto CommandList = D3DRHI->GetCommandContent()->GetCommandList();
+	TD3DTextureRef CurrRenderTarget = D3DRHI->GetViewport()->GetCurrentBackRT();
+
+	D3DRHI->TransitionResource(ColorTexture->GpuResource.get(), D3D12_RESOURCE_STATE_GENERIC_READ);
+
+	D3DRHI->TransitionResource(CurrRenderTarget->GpuResource.get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	D3D12_VIEWPORT ScreenViewport;
+	D3D12_RECT ScissorRect;
+	D3DRHI->GetViewport()->GetD3DViewport(ScreenViewport, ScissorRect);
+	CommandList->RSSetViewports(1, &ScreenViewport);
+	CommandList->RSSetScissorRects(1, &ScissorRect);
+
+	// Clear the back buffer.
+	float ClearColor[4] = {0.f, 0.f, 0.f, 1.0f};
+	CommandList->ClearRenderTargetView(CurrRenderTarget->RTV->GetCpuDescriptorHandle(), ClearColor, 0, nullptr);
+
+	// Specify the buffers we are going to render to.
+	TD3DDescriptor RTDescriptor = CurrRenderTarget->RTV->GetDescriptor();
+	CommandList->OMSetRenderTargets(1, &RTDescriptor.CpuHandle, true, nullptr);
+
+	// Set PSO
+	CommandList->SetPipelineState(GraphicsPSOManager->FindAndCreate(PostProcessPSODescriptor));
+
+	// Set RootSignature
+	CommandList->SetGraphicsRootSignature(PostProcessShader->RootSignature.Get()); //should before binding
+
+	// Set paramters
+	//PostProcessShader->SetParameter("cbPass", BasePassCBRef);
+	PostProcessShader->SetParameter("ColorTexture", ColorTexture->SRV.get());
+
+	// Bind paramters
+	PostProcessShader->BindParameters();
+
+	// Draw ScreenQuad
+	{
+		const TMeshProxy& MeshProxy = MeshProxyMap.at("ScreenQuadMesh");
+
+		// 设置vertex Buffer
+		D3D12_VERTEX_BUFFER_VIEW VBView;
+		VBView.BufferLocation = MeshProxy.VertexBuffer->D3DResource->GetGPUVirtualAddress();
+		VBView.StrideInBytes = MeshProxy.VertexByteStride;
+		VBView.SizeInBytes = MeshProxy.VertexBufferByteSize;
+		CommandList->IASetVertexBuffers(0, 1, &VBView);
+		// 设置index buffer
+		D3D12_INDEX_BUFFER_VIEW IBView;
+		IBView.BufferLocation = MeshProxy.IndexBuffer->D3DResource->GetGPUVirtualAddress();
+		IBView.Format = MeshProxy.IndexFormat;
+		IBView.SizeInBytes = MeshProxy.IndexBufferByteSize;
+		CommandList->IASetIndexBuffer(&IBView);
+
+		D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		CommandList->IASetPrimitiveTopology(PrimitiveType);
+
+		// Draw 
+		auto& SubMesh = MeshProxy.SubMeshs.at("Default");
+		CommandList->DrawIndexedInstanced(SubMesh.IndexCount, 1, SubMesh.StartIndexLocation, SubMesh.BaseVertexLocation, 0);
+	}
+
+	// Transition back-buffer to PRESENT state.
+	D3DRHI->TransitionResource(CurrRenderTarget->GpuResource.get(), D3D12_RESOURCE_STATE_PRESENT);
 }
 
 void TRender::CreateMeshProxys()
@@ -499,74 +588,77 @@ void TRender::CreateGBuffers()
 
 void TRender::CreateGlobalPipelineState()
 {
-	TShaderInfo ShaderInfo;
-	ShaderInfo.ShaderName = "DeferredLighting";
-	ShaderInfo.FileName = "DeferredLighting";
-	ShaderInfo.bCreateVS = true;
-	ShaderInfo.bCreatePS = true;
-	DeferredLightingShader = std::make_unique<TShader>(ShaderInfo, D3DRHI);
+	TShaderInfo DeferInfo;
+	DeferInfo.ShaderName = "DeferredLighting";
+	DeferInfo.FileName = "DeferredLighting";
+	DeferInfo.bCreateVS = true;
+	DeferInfo.bCreatePS = true;
+	DeferredLightingShader = std::make_unique<TShader>(DeferInfo, D3DRHI);
 
+	{
+		D3D12_DEPTH_STENCIL_DESC DSD = TGraphicsPSODescriptor::DefaultDepthStencil();
+		{
+			DSD.DepthEnable = FALSE;
+			DSD.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+			DSD.StencilEnable = TRUE;
+			DSD.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+			DSD.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+		}
 
-	D3D12_DEPTH_STENCIL_DESC LightPassDSD;
-	LightPassDSD.DepthEnable = false;
-	LightPassDSD.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-	LightPassDSD.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-	LightPassDSD.StencilEnable = true;
-	LightPassDSD.StencilReadMask = 0xff;
-	LightPassDSD.StencilWriteMask = 0x0;
-	const D3D12_DEPTH_STENCILOP_DESC DefaultStencilOp =
-	{
-		D3D12_STENCIL_OP_KEEP,
-		D3D12_STENCIL_OP_KEEP,
-		D3D12_STENCIL_OP_KEEP,
-		D3D12_COMPARISON_FUNC_GREATER_EQUAL
-	};
-	LightPassDSD.FrontFace = DefaultStencilOp;
-	LightPassDSD.BackFace = DefaultStencilOp;
+		D3D12_BLEND_DESC BlendState = TGraphicsPSODescriptor::DefaultBlend();
+		{
+			BlendState.RenderTarget[0].BlendEnable = TRUE;
+			BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+			BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+			BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+		}
 
-	D3D12_BLEND_DESC BlendState;
-	BlendState.AlphaToCoverageEnable = false;
-	BlendState.IndependentBlendEnable = false;
-	const D3D12_RENDER_TARGET_BLEND_DESC DefaultRenderTargetBlendDesc =
-	{
-		FALSE,FALSE,
-		D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-		D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-		D3D12_LOGIC_OP_NOOP,
-		D3D12_COLOR_WRITE_ENABLE_ALL,
-	};
-	for (UINT i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
-	{
-		BlendState.RenderTarget[i] = DefaultRenderTargetBlendDesc;
+		D3D12_RASTERIZER_DESC RasterizerDesc = TGraphicsPSODescriptor::DefaultRasterizer();
+		{
+			RasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+			RasterizerDesc.DepthClipEnable = FALSE;
+		}
+
+		DeferredLightingPSODescriptor.InputLayoutName = std::string("DefaultInputLayout");
+		DeferredLightingPSODescriptor.Shader = DeferredLightingShader.get();
+		DeferredLightingPSODescriptor.BlendDesc = BlendState;
+		DeferredLightingPSODescriptor.DepthStencilDesc = DSD;
+		DeferredLightingPSODescriptor.RasterizerDesc = RasterizerDesc;
+		DeferredLightingPSODescriptor.RTVFormats[0] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		DeferredLightingPSODescriptor.NumRenderTargets = 1;
+
+		GraphicsPSOManager->TryCreate(DeferredLightingPSODescriptor);
 	}
 
-	BlendState.RenderTarget[0].BlendEnable = true;
-	BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
 
-	D3D12_RASTERIZER_DESC RasterizerDesc;
-	RasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-	RasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
-	RasterizerDesc.FrontCounterClockwise = FALSE;
-	RasterizerDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
-	RasterizerDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
-	RasterizerDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-	RasterizerDesc.DepthClipEnable = false;
-	RasterizerDesc.MultisampleEnable = FALSE;
-	RasterizerDesc.AntialiasedLineEnable = FALSE;
-	RasterizerDesc.ForcedSampleCount = 0;
-	RasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+	TShaderInfo PostProcessInfo;
+	PostProcessInfo.ShaderName = "PostProcess";
+	PostProcessInfo.FileName = "PostProcess";
+	PostProcessInfo.bCreateVS = true;
+	PostProcessInfo.bCreatePS = true;
+	PostProcessShader = std::make_unique<TShader>(PostProcessInfo, D3DRHI);
 
-	DeferredLightingPSODescriptor.InputLayoutName = std::string("DefaultInputLayout");
-	DeferredLightingPSODescriptor.Shader = DeferredLightingShader.get();
-	DeferredLightingPSODescriptor.BlendDesc = BlendState;
-	DeferredLightingPSODescriptor.DepthStencilDesc = LightPassDSD;
-	DeferredLightingPSODescriptor.RasterizerDesc = RasterizerDesc;
-	DeferredLightingPSODescriptor.RTVFormats[0] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	DeferredLightingPSODescriptor.NumRenderTargets = 1;
+	{
+		D3D12_DEPTH_STENCIL_DESC DSD = TGraphicsPSODescriptor::DefaultDepthStencil();
+		{
+			DSD.DepthEnable = FALSE;
+		}
 
-	GraphicsPSOManager->TryCreate(DeferredLightingPSODescriptor);
+		D3D12_RASTERIZER_DESC RasterizerDesc = TGraphicsPSODescriptor::DefaultRasterizer();
+		{
+			RasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+		}
+
+		PostProcessPSODescriptor.InputLayoutName = std::string("DefaultInputLayout");
+		PostProcessPSODescriptor.Shader = PostProcessShader.get();
+		PostProcessPSODescriptor.DepthStencilDesc = DSD;
+		PostProcessPSODescriptor.RasterizerDesc = RasterizerDesc;
+		PostProcessPSODescriptor.NumRenderTargets = 1;
+		PostProcessPSODescriptor.RTVFormats[0] = D3DRHI->GetViewport()->GetViewportInfo().BackBufferFormat;
+		PostProcessPSODescriptor.DSVFormat = DXGI_FORMAT_UNKNOWN;
+
+		GraphicsPSOManager->TryCreate(PostProcessPSODescriptor);
+	}
 }
 
 void TRender::CreateColorTextures()
@@ -608,19 +700,26 @@ void TRender::UpdatePassConstants()
 	}
 	TMatrix View = CameraComponent->GetView();
 	TMatrix Proj = CameraComponent->GetProj();
+	TMatrix ViewProj = View * Proj;
+	TMatrix PrevViewProj = CameraComponent->GetPrevViewProj();
 	TVector3f EyePosW = CameraComponent->GetWorldLocation();
 
 	TPassConstants PassConstants;
-	PassConstants.View = View;
-	PassConstants.Proj = Proj;
+	PassConstants.View = View.Transpose();
+	PassConstants.Proj = Proj.Transpose();
+	PassConstants.ViewProj = ViewProj.Transpose();
+	PassConstants.PrevViewProj = PrevViewProj.Transpose();
 	PassConstants.EyePosW = EyePosW;
 
 	auto ResourceAllocator = D3DRHI->GetDevice()->GetResourceAllocator();
 
-	TD3DResourceInitInfo PassCBInitInfo = TD3DResourceInitInfo::Buffer_Default(sizeof(TPassConstants));
+	TD3DResourceInitInfo PassCBInitInfo = TD3DResourceInitInfo::Buffer_Upload(sizeof(TPassConstants));
 	ResourceAllocator->Allocate(PassCBInitInfo, PassConstBufRef.get());
 
-	D3DRHI->UploadBuffer(PassConstBufRef.get(), &PassConstants, sizeof(TPassConstants));
+	void* MappedData = nullptr;
+	PassConstBufRef->D3DResource->Map(0, nullptr, &MappedData);
+	memcpy_s(MappedData, sizeof(TPassConstants), &PassConstants, sizeof(TPassConstants));
+	PassConstBufRef->D3DResource->Unmap(0, nullptr);
 }
 
 void TRender::UpdateLightParameters()
@@ -649,25 +748,34 @@ void TRender::UpdateLightParameters()
 	uint32_t ElementCount = LightParametersArray.size();
 	uint32_t ElementSize = (uint32_t)(sizeof(TLightParameters));
 
-	LightParametersBufRef = std::make_shared<TD3DResource>();
-	LightParametersSRVRef = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), LightParametersBufRef.get());
+	LightParametersBufRef = std::make_shared<TD3DBuffer>();
+	LightParametersBufRef->SRV = std::make_shared<TD3DShaderResourceView>(D3DRHI->GetDevice(), LightParametersBufRef->GpuResource.get());
 
 	// Create LightParameter Buffer
-	TD3DResourceInitInfo InitInfo = TD3DResourceInitInfo::Buffer_Default(ElementCount * ElementSize);
-	D3DRHI->GetDevice()->GetResourceAllocator()->Allocate(InitInfo, LightParametersBufRef.get());
+	TD3DResourceInitInfo InitInfo = TD3DResourceInitInfo::Buffer_Upload(ElementCount * ElementSize);
+	D3DRHI->GetDevice()->GetResourceAllocator()->Allocate(InitInfo, LightParametersBufRef->GpuResource.get());
 
-	// Create LightParameter SRV
-	//D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};
-	//SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//SrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	//SrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	//SrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	//SrvDesc.Buffer.StructureByteStride = ElementSize;
-	//SrvDesc.Buffer.NumElements = ElementCount;
-	//SrvDesc.Buffer.FirstElement = 0;
+	void* MappedData = nullptr;
+	LightParametersBufRef->GpuResource->D3DResource->Map(0, nullptr, &MappedData);
+	memcpy_s(MappedData, ElementCount * ElementSize, LightParametersArray.data(), ElementCount * ElementSize);
+	LightParametersBufRef->GpuResource->D3DResource->Unmap(0, nullptr);
 
-	//D3DRHI->GetDevice()->GetViewAllocator()->CreateShaderResourceView(LightParametersBufRef.get(), LightParametersSRVRef.get(), SrvDesc);
 
-	TD3DViewInitInfo SRView = TD3DViewInitInfo::SRView_Buffer(LightParametersBufRef.get(), ElementSize, ElementCount);
-	D3DRHI->GetDevice()->GetViewAllocator()->Allocate(LightParametersSRVRef.get(), SRView);
+	TD3DViewInitInfo SRView = TD3DViewInitInfo::SRView_Buffer(LightParametersBufRef->GpuResource.get(), ElementSize, ElementCount);
+	D3DRHI->GetDevice()->GetViewAllocator()->Allocate(LightParametersBufRef->SRV.get(), SRView);
+
+	{
+		TLightCommon LightCommon;
+		LightCommon.LightCount = LightParametersArray.size();
+
+		LightCommonBufRef = std::make_shared<TD3DResource>();
+
+		TD3DResourceInitInfo InitInfo = TD3DResourceInitInfo::Buffer_Upload(sizeof(TLightCommon));
+		D3DRHI->GetDevice()->GetResourceAllocator()->Allocate(InitInfo, LightCommonBufRef.get());
+
+		void* MappedData = nullptr;
+		LightCommonBufRef.get()->D3DResource->Map(0, nullptr, &MappedData);
+		memcpy_s(MappedData, sizeof(TLightCommon), &LightCommon, sizeof(TLightCommon));
+		LightCommonBufRef.get()->D3DResource->Unmap(0, nullptr);
+	}
 }

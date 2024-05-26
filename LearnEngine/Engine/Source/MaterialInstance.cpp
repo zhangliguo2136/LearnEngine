@@ -13,15 +13,18 @@ TMaterialInstance::TMaterialInstance(TMaterial* InParent, const std::string& InN
 void TMaterialInstance::UpdateConstants(TD3DRHI* D3DRHI)
 {
 	TMaterialConstant MatConst;
-	MatConst.EmissiveColor = TVector3f(1.f, 1.f, 1.f);
+	MatConst.EmissiveColor = TVector3f(0.f, 0.f, 0.f);
 	MatConst.ShadingModel = (uint32_t)Parent->ShadingModel;
 
-	MaterialConstantsRef = std::make_shared<TD3DResource>();
+	if (MaterialConstantsRef == nullptr)
+	{
+		MaterialConstantsRef = std::make_shared<TD3DResource>();
 
-	auto ResourceAllocator = D3DRHI->GetDevice()->GetResourceAllocator();
+		auto ResourceAllocator = D3DRHI->GetDevice()->GetResourceAllocator();
 
-	TD3DResourceInitInfo MatConstInitInfo = TD3DResourceInitInfo::Buffer_Default(sizeof(TMaterialConstant));
-	ResourceAllocator->Allocate(MatConstInitInfo, MaterialConstantsRef.get());
+		TD3DResourceInitInfo MatConstInitInfo = TD3DResourceInitInfo::Buffer_Default(sizeof(TMaterialConstant));
+		ResourceAllocator->Allocate(MatConstInitInfo, MaterialConstantsRef.get());
+	}
 
 	D3DRHI->UploadBuffer(MaterialConstantsRef.get(), &MatConst, sizeof(TMaterialConstant));
 }

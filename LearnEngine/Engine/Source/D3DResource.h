@@ -2,6 +2,8 @@
 #include <d3d12.h>
 #include <wrl/module.h>
 #include <stdint.h>
+#include <string>
+
 #define DEFAULT_POOL_SIZE (512 * 1024 * 512)
 
 enum class EAllocationStrategy
@@ -29,14 +31,12 @@ public:
 
 	D3D12_RESOURCE_DESC ResourceDesc;
 	D3D12_RESOURCE_STATES InitState = D3D12_RESOURCE_STATE_COMMON;
-
-	D3D12_CLEAR_VALUE ClearValue;
 };
 
 class TD3DResource
 {
 public:
-	TD3DResource();
+	TD3DResource(std::string Name = "");
 	TD3DResource(Microsoft::WRL::ComPtr<ID3D12Resource>, D3D12_RESOURCE_STATES);
 	~TD3DResource();
 
@@ -45,4 +45,7 @@ public:
 
 	ID3D12Heap* BackingHeap = nullptr;
 	uint64_t OffsetFromBaseOfHeap = 0;
+
+public:
+	std::string Name;
 };

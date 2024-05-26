@@ -1,12 +1,14 @@
 #include "CameraComponent.h"
+#include <iostream>
 
 TCameraComponent::TCameraComponent()
 {
+	this->SetLens(0.25f * TMath::PI, 960.f/ 540.f, 0.1f, 100.f);
 }
 
 TCameraComponent::~TCameraComponent()
 {
-	this->SetLens(0.25f * TMath::PI, 1.f, 0.1f, 100.f);
+
 }
 
 void TCameraComponent::SetPrevViewProj(const TMatrix& VP)
@@ -37,6 +39,7 @@ void TCameraComponent::SetLens(float InFovY, float InAspect, float InNearZ, floa
 	FarZ = InFarZ;
 
 	Proj = TMatrix::CreatePerspectiveFieldOfView(FovY, Aspect, NearZ, FarZ);
+	printf("%f, %f, %f, %f\n", FovY, Aspect, NearZ, FarZ);
 }
 
 void TCameraComponent::MoveRight(float Distance)

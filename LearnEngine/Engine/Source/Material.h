@@ -26,7 +26,7 @@ public:
 	std::string Name;
 	std::string ShaderName;
 
-	EShadingMode ShadingModel = EShadingMode::DefaultLit;
+	EShadingMode ShadingModel = EShadingMode::Unlit;
 	std::unordered_map<std::string, std::string> TextureMap;
 
 private:

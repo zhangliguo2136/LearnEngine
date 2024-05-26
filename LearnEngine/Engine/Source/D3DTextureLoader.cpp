@@ -18,7 +18,7 @@ void TD3DTextureLoader::Load(TD3DTextureRef D3DTextureRef, TTextureInfo& Texture
 	auto ViewAllocator = D3DRHI->GetDevice()->GetViewAllocator();
 
 	// 通过通道数和通道大小获取数据格式
-	DXGI_FORMAT Format = DXGI_FORMAT_R8G8B8A8_UINT;
+	DXGI_FORMAT Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	if (TextureInfo.ComponentSize == 4)
 	{
 		Format = DXGI_FORMAT_R32G32B32A32_FLOAT;

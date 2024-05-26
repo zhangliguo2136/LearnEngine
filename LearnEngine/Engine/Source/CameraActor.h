@@ -12,6 +12,8 @@ public:
 
 	TCameraComponent* GetCameraComponent();
 
+	virtual void Tick(float dt) override;
+
 private:
 	TCameraComponent* CameraComponent = nullptr;
 };

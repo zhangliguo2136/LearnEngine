@@ -35,9 +35,11 @@ TEngine::TEngine(TWorld* InWorld, TWindowsApplication* InWinApp)
 void TEngine::Update(float dt)
 {
 	D3DRHI->BeginFrame();
+	World->BeginFrame();
 
 	World->Update(dt);
 	Render->Draw(dt);
 
+	World->EndFrame();
 	D3DRHI->EndFrame();
 }

@@ -6,61 +6,90 @@
 
 TGraphicsPSODescriptor::TGraphicsPSODescriptor()
 {
-	{
-		SampleDesc.Count = 1;
-		SampleDesc.Quality = 0;
-	}
-
-	{
-		RasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-		RasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-		RasterizerDesc.FrontCounterClockwise = FALSE;
-		RasterizerDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
-		RasterizerDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
-		RasterizerDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-		RasterizerDesc.DepthClipEnable = TRUE;
-		RasterizerDesc.MultisampleEnable = FALSE;
-		RasterizerDesc.AntialiasedLineEnable = FALSE;
-		RasterizerDesc.ForcedSampleCount = 0;
-		RasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
-	}
-
-	{
-		BlendDesc.AlphaToCoverageEnable = FALSE;
-		BlendDesc.IndependentBlendEnable = FALSE;
-		const D3D12_RENDER_TARGET_BLEND_DESC DefaultRenderTargetBlendDesc =
-		{
-			FALSE,FALSE,
-			D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-			D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-			D3D12_LOGIC_OP_NOOP,
-			D3D12_COLOR_WRITE_ENABLE_ALL,
-		};
-		for (UINT i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
-		{
-			BlendDesc.RenderTarget[i] = DefaultRenderTargetBlendDesc;
-		}
-	}
-
-	{
-		DepthStencilDesc.DepthEnable = TRUE;
-		DepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		DepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-		DepthStencilDesc.StencilEnable = FALSE;
-		DepthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
-		DepthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
-		const D3D12_DEPTH_STENCILOP_DESC DefaultStencilOp =
-		{ 
-			D3D12_STENCIL_OP_KEEP, 
-			D3D12_STENCIL_OP_KEEP, 
-			D3D12_STENCIL_OP_KEEP, 
-			D3D12_COMPARISON_FUNC_ALWAYS 
-		};
-		DepthStencilDesc.FrontFace = DefaultStencilOp;
-		DepthStencilDesc.BackFace = DefaultStencilOp;
-	}
+	BlendDesc = TGraphicsPSODescriptor::DefaultBlend();
+	DepthStencilDesc = TGraphicsPSODescriptor::DefaultDepthStencil();
+	RasterizerDesc = TGraphicsPSODescriptor::DefaultRasterizer();
+	SampleDesc = TGraphicsPSODescriptor::DefaultDXGISample();
 }
 
+D3D12_BLEND_DESC TGraphicsPSODescriptor::DefaultBlend()
+{
+	D3D12_BLEND_DESC BlendDesc;
+
+	BlendDesc.AlphaToCoverageEnable = FALSE;
+	BlendDesc.IndependentBlendEnable = FALSE;
+
+	const D3D12_RENDER_TARGET_BLEND_DESC DefaultRenderTargetBlendDesc =
+	{
+		FALSE,FALSE,
+		D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+		D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+		D3D12_LOGIC_OP_NOOP,
+		D3D12_COLOR_WRITE_ENABLE_ALL,
+	};
+	for (UINT i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
+	{
+		BlendDesc.RenderTarget[i] = DefaultRenderTargetBlendDesc;
+	}
+
+	return BlendDesc;
+}
+
+D3D12_RASTERIZER_DESC TGraphicsPSODescriptor::DefaultRasterizer()
+{
+	D3D12_RASTERIZER_DESC RasterizerDesc;
+
+	RasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	RasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	RasterizerDesc.FrontCounterClockwise = FALSE;
+	RasterizerDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+	RasterizerDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+	RasterizerDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+	RasterizerDesc.DepthClipEnable = TRUE;
+	RasterizerDesc.MultisampleEnable = FALSE;
+	RasterizerDesc.AntialiasedLineEnable = FALSE;
+	RasterizerDesc.ForcedSampleCount = 0;
+	RasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return RasterizerDesc;
+}
+
+D3D12_DEPTH_STENCIL_DESC TGraphicsPSODescriptor::DefaultDepthStencil()
+{
+	D3D12_DEPTH_STENCIL_DESC DepthStencilDesc;
+
+	DepthStencilDesc.DepthEnable = TRUE;
+	DepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	DepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	DepthStencilDesc.StencilEnable = FALSE;
+	DepthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+	DepthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
+
+	const D3D12_DEPTH_STENCILOP_DESC DefaultStencilOp =
+	{
+		D3D12_STENCIL_OP_KEEP,
+		D3D12_STENCIL_OP_KEEP,
+		D3D12_STENCIL_OP_KEEP,
+		D3D12_COMPARISON_FUNC_ALWAYS
+	};
+	DepthStencilDesc.FrontFace = DefaultStencilOp;
+	DepthStencilDesc.BackFace = DefaultStencilOp;
+
+	return DepthStencilDesc;
+}
+
+DXGI_SAMPLE_DESC TGraphicsPSODescriptor::DefaultDXGISample()
+{
+	DXGI_SAMPLE_DESC SampleDesc;
+
+	SampleDesc.Count = 1;
+	SampleDesc.Quality = 0;
+
+	return SampleDesc;
+}
+
+
+/*------------------------------------------------------------------------------------*/
 
 TGraphicsPSOManager::TGraphicsPSOManager(TD3DRHI* InD3DRHI, TInputLayoutManager* InInputLayoutManager)
 	:D3DRHI(InD3DRHI), InputLayoutManager(InInputLayoutManager)

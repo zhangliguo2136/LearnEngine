@@ -79,6 +79,9 @@
     <Filter Include="源文件\D3D\D3DDevice">
       <UniqueIdentifier>{051ba27d-859d-4629-bd4c-ce7906b05c69}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\D3D\D3DBuffer">
+      <UniqueIdentifier>{523038df-5666-42a0-9172-c82de2e2aa3c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\Shaders\BasePassDefault.hlsl">
@@ -100,6 +103,12 @@
       <Filter>资源文件\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Resource\Shaders\Common.hlsl">
+      <Filter>资源文件\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shaders\PostProcess.hlsl">
+      <Filter>资源文件\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shaders\Utils.hlsl">
       <Filter>资源文件\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
@@ -256,6 +265,9 @@
     </ClCompile>
     <ClCompile Include="Source\CameraActor.cpp">
       <Filter>源文件\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DBuffer.cpp">
+      <Filter>源文件\D3D\D3DBuffer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -429,6 +441,9 @@
     </ClInclude>
     <ClInclude Include="Source\CameraActor.h">
       <Filter>源文件\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DBuffer.h">
+      <Filter>源文件\D3D\D3DBuffer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
